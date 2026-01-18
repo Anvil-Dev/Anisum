@@ -15,11 +15,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.LootTables;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,23 +33,35 @@ public class AnisumFabric implements ModInitializer {
     @Override
     public void onInitialize() {
         ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(AnisumFabric::endDataPackReload);
+        ServerLifecycleEvents.SERVER_STARTED.register(AnisumFabric::serverStarted);
     }
 
-    public static void endDataPackReload(@Nonnull MinecraftServer server, @Nonnull ServerResources serverResourceManager, boolean success) {
+    private static void serverStarted(MinecraftServer server) {
+        AnisumFabric.lootLoaded(server, server.getLootTables());
+    }
+
+
+    private static void endDataPackReload(
+        @Nonnull MinecraftServer server,
+        @Nonnull ServerResources serverResourceManager,
+        boolean success
+    ) {
+        LootTables lootTables = serverResourceManager.getLootTables();
+        AnisumFabric.lootLoaded(server, lootTables);
+    }
+
+    private static void lootLoaded(@Nonnull MinecraftServer server, @Nonnull LootTables lootTables) {
         LootContext context = new LootContext.Builder(server.overworld()).create(new LootContextParamSet.Builder().build());
-        Set<ResourceLocation> ids = serverResourceManager.getLootTables().getIds();
+        Set<ResourceLocation> ids = lootTables.getIds();
         Map<String, List<Pair<ResourceLocation, ItemStack>>> lootTableResults = new HashMap<>();
-        Anisum.LOGGER.info("Anisum: Starting loot table reload");
         for (ResourceLocation id : ids) {
             try {
                 if (id.getPath().contains("/")) continue;
-                LootTable lootTable = serverResourceManager.getLootTables().get(id);
-//                if (!(lootTable instanceof LootTableAccessor)) continue;
+                LootTable lootTable = lootTables.get(id);
                 LootTableAccessor tableAccessor = (LootTableAccessor) lootTable;
                 LootPool[] pools = tableAccessor.getPools();
                 if (pools.length != 1) continue;
                 LootPool pool = pools[0];
-//                if (!(pool instanceof LootPoolAccessor)) continue;
                 LootPoolAccessor poolAccessor = (LootPoolAccessor) pool;
                 LootPoolEntryContainer[] entries = poolAccessor.getEntries();
                 if (entries.length != 1) continue;
@@ -55,35 +69,36 @@ public class AnisumFabric implements ModInitializer {
                 if (!(entry instanceof LootItem)) continue;
                 lootTable.getRandomItems(
                     context,
-                    stack -> lootTableResults.computeIfAbsent(id.getPath(), k -> new ArrayList<>()).add(Pair.of(id, stack))
+                    stack -> lootTableResults.computeIfAbsent(id.getNamespace(), k -> new ArrayList<>()).add(Pair.of(id, stack))
                 );
             } catch (Exception e) {
                 Anisum.LOGGER.error("Anisum: Error while processing loot table {}", id, e);
                 throw e;
             }
         }
-        Anisum.LOGGER.info("Anisum: Loaded {} loot table results", lootTableResults.size());
         for (Map.Entry<String, List<Pair<ResourceLocation, ItemStack>>> entry : lootTableResults.entrySet()) {
             ResourceLocation location = new ResourceLocation("anisum", entry.getKey());
             String displayName = String.format("itemGroup.%s.%s", location.getNamespace(), location.getPath());
             CreativeModeTab tab = null;
             for (CreativeModeTab check : CreativeModeTab.TABS) {
                 if (!(check.getDisplayName() instanceof TranslatableComponent)) continue;
+                //noinspection PatternVariableCanBeUsed
                 TranslatableComponent translatableComponent = (TranslatableComponent) check.getDisplayName();
                 if (translatableComponent.getKey().equals(displayName)) {
                     tab = check;
                     break;
                 }
             }
+            entry.getValue().sort(Comparator.comparing(a -> a.getFirst().toString()));
             if (tab == null) {
+                //noinspection SequencedCollectionMethodCanBeUsed
                 tab = FabricItemGroupBuilder.create(location)
                     .icon(() -> entry.getValue().get(0).getSecond())
-                    .appendItems(items -> items.addAll(
-                        entry.getValue()
-                            .stream()
-                            .map(Pair::getSecond)
-                            .collect(Collectors.toCollection(ArrayList::new))
-                    )).build();
+                    .appendItems(items -> items.addAll(entry.getValue()
+                        .stream()
+                        .map(Pair::getSecond)
+                        .collect(Collectors.toCollection(ArrayList::new))))
+                    .build();
             }
         }
     }
