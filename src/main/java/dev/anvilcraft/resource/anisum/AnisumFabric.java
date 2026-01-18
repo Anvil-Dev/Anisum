@@ -77,7 +77,7 @@ public class AnisumFabric implements ModInitializer {
             }
         }
         for (Map.Entry<String, List<Pair<ResourceLocation, ItemStack>>> entry : lootTableResults.entrySet()) {
-            ResourceLocation location = new ResourceLocation("anisum", entry.getKey());
+            ResourceLocation location = Anisum.location(entry.getKey());
             String displayName = String.format("itemGroup.%s.%s", location.getNamespace(), location.getPath());
             CreativeModeTab tab = null;
             for (CreativeModeTab check : CreativeModeTab.TABS) {
