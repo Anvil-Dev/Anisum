@@ -39,23 +39,28 @@ public class AnisumFabric implements ModInitializer {
         Map<String, List<Pair<ResourceLocation, ItemStack>>> lootTableResults = new HashMap<>();
         Anisum.LOGGER.info("Anisum: Starting loot table reload");
         for (ResourceLocation id : ids) {
-            if (id.getPath().contains("/")) continue;
-            LootTable lootTable = serverResourceManager.getLootTables().get(id);
-            if (!(lootTable instanceof LootTableAccessor)) continue;
-            LootTableAccessor tableAccessor = (LootTableAccessor) lootTable;
-            LootPool[] pools = tableAccessor.getPools();
-            if (pools.length != 1) continue;
-            LootPool pool = pools[0];
-            if (!(pool instanceof LootPoolAccessor)) continue;
-            LootPoolAccessor poolAccessor = (LootPoolAccessor) pool;
-            LootPoolEntryContainer[] entries = poolAccessor.getEntries();
-            if (entries.length != 1) continue;
-            LootPoolEntryContainer entry = entries[0];
-            if (!(entry instanceof LootItem)) continue;
-            lootTable.getRandomItems(
-                context,
-                stack -> lootTableResults.computeIfAbsent(id.getPath(), k -> new ArrayList<>()).add(Pair.of(id, stack))
-            );
+            try {
+                if (id.getPath().contains("/")) continue;
+                LootTable lootTable = serverResourceManager.getLootTables().get(id);
+//                if (!(lootTable instanceof LootTableAccessor)) continue;
+                LootTableAccessor tableAccessor = (LootTableAccessor) lootTable;
+                LootPool[] pools = tableAccessor.getPools();
+                if (pools.length != 1) continue;
+                LootPool pool = pools[0];
+//                if (!(pool instanceof LootPoolAccessor)) continue;
+                LootPoolAccessor poolAccessor = (LootPoolAccessor) pool;
+                LootPoolEntryContainer[] entries = poolAccessor.getEntries();
+                if (entries.length != 1) continue;
+                LootPoolEntryContainer entry = entries[0];
+                if (!(entry instanceof LootItem)) continue;
+                lootTable.getRandomItems(
+                    context,
+                    stack -> lootTableResults.computeIfAbsent(id.getPath(), k -> new ArrayList<>()).add(Pair.of(id, stack))
+                );
+            } catch (Exception e) {
+                Anisum.LOGGER.error("Anisum: Error while processing loot table {}", id, e);
+                throw e;
+            }
         }
         Anisum.LOGGER.info("Anisum: Loaded {} loot table results", lootTableResults.size());
         for (Map.Entry<String, List<Pair<ResourceLocation, ItemStack>>> entry : lootTableResults.entrySet()) {

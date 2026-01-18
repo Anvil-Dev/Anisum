@@ -275,6 +275,10 @@ tasks.named('sourcesJar').configure {
     dependsOn delombok
 }
 
+tasks.named("runClient").configure {
+    dependsOn tasks.named("build")
+}
+
 jar {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     from(rootProject.file("LICENSE"))
