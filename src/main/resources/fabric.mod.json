@@ -26,7 +26,7 @@
     ]
   },
   "mixins": [
-    "anisum.json"
+    "anisum.mixins.json"
   ],
   "depends": {
     "minecraft": "${minecraft_dependency}"
