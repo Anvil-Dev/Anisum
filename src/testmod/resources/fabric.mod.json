@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "testmod",
+  "name": "testmod",
+  "version": "1.0.0",
+  "description": "testmod",
+  "authors": [
+    {
+      "name": "Anvil-Dev",
+      "contact": {
+        "homepage": "https://github.com/Anvil-Dev"
+      }
+    }
+  ],
+  "license": "*",
+  "contact": {},
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.anvilcraft.lib.registrum.test.TestMod"
+    ]
+  },
+  "mixins": [
+  ],
+  "depends": {
+    "minecraft": "*"
+  }
+}

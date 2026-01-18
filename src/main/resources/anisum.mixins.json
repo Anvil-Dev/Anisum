@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.anvilcraft.resource.anisum.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "LootPoolAccessor",
+    "LootTableAccessor"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

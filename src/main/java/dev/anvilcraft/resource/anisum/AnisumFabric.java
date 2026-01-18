@@ -1,0 +1,85 @@
+package dev.anvilcraft.resource.anisum;
+
+import com.mojang.datafixers.util.Pair;
+import dev.anvilcraft.resource.anisum.mixin.LootPoolAccessor;
+import dev.anvilcraft.resource.anisum.mixin.LootTableAccessor;
+import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ServerResources;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootPool;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+
+public class AnisumFabric implements ModInitializer {
+    @Override
+    public void onInitialize() {
+        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(AnisumFabric::endDataPackReload);
+    }
+
+    public static void endDataPackReload(@Nonnull MinecraftServer server, @Nonnull ServerResources serverResourceManager, boolean success) {
+        LootContext context = new LootContext.Builder(server.overworld()).create(new LootContextParamSet.Builder().build());
+        Set<ResourceLocation> ids = serverResourceManager.getLootTables().getIds();
+        Map<String, List<Pair<ResourceLocation, ItemStack>>> lootTableResults = new HashMap<>();
+        Anisum.LOGGER.info("Anisum: Starting loot table reload");
+        for (ResourceLocation id : ids) {
+            if (id.getPath().contains("/")) continue;
+            LootTable lootTable = serverResourceManager.getLootTables().get(id);
+            if (!(lootTable instanceof LootTableAccessor)) continue;
+            LootTableAccessor tableAccessor = (LootTableAccessor) lootTable;
+            LootPool[] pools = tableAccessor.getPools();
+            if (pools.length != 1) continue;
+            LootPool pool = pools[0];
+            if (!(pool instanceof LootPoolAccessor)) continue;
+            LootPoolAccessor poolAccessor = (LootPoolAccessor) pool;
+            LootPoolEntryContainer[] entries = poolAccessor.getEntries();
+            if (entries.length != 1) continue;
+            LootPoolEntryContainer entry = entries[0];
+            if (!(entry instanceof LootItem)) continue;
+            lootTable.getRandomItems(
+                context,
+                stack -> lootTableResults.computeIfAbsent(id.getPath(), k -> new ArrayList<>()).add(Pair.of(id, stack))
+            );
+        }
+        Anisum.LOGGER.info("Anisum: Loaded {} loot table results", lootTableResults.size());
+        for (Map.Entry<String, List<Pair<ResourceLocation, ItemStack>>> entry : lootTableResults.entrySet()) {
+            ResourceLocation location = new ResourceLocation("anisum", entry.getKey());
+            String displayName = String.format("itemGroup.%s.%s", location.getNamespace(), location.getPath());
+            CreativeModeTab tab = null;
+            for (CreativeModeTab check : CreativeModeTab.TABS) {
+                if (!(check.getDisplayName() instanceof TranslatableComponent)) continue;
+                TranslatableComponent translatableComponent = (TranslatableComponent) check.getDisplayName();
+                if (translatableComponent.getKey().equals(displayName)) {
+                    tab = check;
+                    break;
+                }
+            }
+            if (tab == null) {
+                tab = FabricItemGroupBuilder.create(location)
+                    .icon(() -> entry.getValue().get(0).getSecond())
+                    .appendItems(items -> items.addAll(
+                        entry.getValue()
+                            .stream()
+                            .map(Pair::getSecond)
+                            .collect(Collectors.toCollection(ArrayList::new))
+                    )).build();
+            }
+        }
+    }
+}

@@ -1,0 +1,100 @@
+name: Bug Report - Bug反馈
+description: Create a report to help us improve. - 反馈问题，帮助我们改进
+title: "[Bug] "
+labels:
+  - 🐛 bug
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filling in this `issue`, please make sure that there are no similar or duplicate `issues` that have been opened.
+        填写此 `issue` 前，请先确认已经开启的 `issue` 没有类似或重复的 `issue`。
+
+  - type: dropdown
+    id: system
+    attributes:
+      label: OS Version - 操作系统
+      options:
+        - Linux
+        - Windows
+        - MacOS
+    validations:
+      required: true
+
+  - type: input
+    id: mc_version
+    attributes:
+      label: Minecraft Version Details - Minecraft 版本信息
+      description: |
+        What version of Minecraft do you use?
+        你使用的 Minecraft 版本是什么
+      placeholder: Minecraft version
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mod_loader
+    attributes:
+      label: Mod Loader - 模组加载器
+      options:
+        - NeoForge
+        - Forge
+        - Fabric
+        - Quilt
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version Details - 版本信息
+      description: |
+        What version of Registrum do you use? Please check if your version number format is `x.x.x` or `x.x.x+build.x`, and if it is `x.x.x+pr.x`, please go to `Pull Request` for feedback.
+        你使用的 Registrum 版本是什么？请检查你的版本号格式是否为 `x.x.x` 或 `x.x.x+build.x`，如果为 `x.x.x+pr.x`，请前往对于的 `Pull Request` 进行反馈。
+      placeholder: Registrum version
+    validations:
+      required: true
+
+  - type: textarea
+    id: exist
+    attributes:
+      label: Existing behavior - 现有行为
+      description: |
+        Please describe the problem you have encountered carefully.Log and crash-report please upload to mclo.gs, and paste the link from the address bar here. Do not upload files or directly paste into the text.
+        请仔细描述你所遇到的问题。 log 与 crash-report 请上传至 [mclo.gs](https://mclo.gs/) ，并将地址栏中的链接复制到这里，请勿上传文件或直接粘贴至正文中。
+    validations:
+      required: true
+
+  - type: textarea
+    id: expect
+    attributes:
+      label: Expected behavior - 预期行为
+      description: |
+        Please describe in detail the results you wish to achieve.
+        请仔细描述你要得到的结果。
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: To Reproduce - 复现问题
+      description: |
+        How do you trigger this bug? Please walk us through it step by step.
+        这个bug是怎么触发的？请详细告诉我们是怎样出现这个情况的。
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: know
+    attributes:
+      label: Checks - 检查项
+      options:
+        - label: I have searched the [issue tracker](https://github.com/Anvil-Dev/Registrum/issues) and confirmed that there is no identical issue. 我已经搜索[问题追踪器](https://github.com/Anvil-Dev/Registrum/issues)并且确认没有相同的 Issue。
+          required: true
+        - label: I admit that I previously checked all options without thorough verification and directly submitted this Issue, and I agree that it can be closed directly. 我承认此前未充分核实便勾选了所有选项并直接提交此 Issue ，且同意该 Issue 可被直接关闭。
+        - label: I confirm that I am currently using the latest snapshot or LTS version of Registrum. If not, this issue can be closed directly. 我确认当前使用的是Registrum的最新快照版本或 LTS 版本，若非如此，此 Issue 可被直接关闭。
+          required: true
+        - label: I promise to provide a detailed description of the encountered issue, along with relevant logs and screenshots, rather than offering incomplete or vague information. 我承诺将详细描述遇到的问题，并提供相关日志与截图，而非提供不完整或模糊的信息。
+          required: true

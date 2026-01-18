@@ -1,0 +1,69 @@
+import groovy.json.JsonSlurper
+
+pluginManagement {
+    repositories {
+        mavenCentral()
+
+        maven {
+            name = "Architectury"
+            url = "https://maven.architectury.dev"
+        }
+
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+
+        maven {
+            name = "MinecraftForge"
+            url = "https://files.minecraftforge.net/maven"
+        }
+
+        maven {
+            name = "NeoForge"
+            url = "https://maven.neoforged.net/releases"
+        }
+
+        maven {
+            name = "Jitpack"
+            url = "https://jitpack.io"
+        }
+
+        gradlePluginPortal()
+    }
+
+    resolutionStrategy {
+        eachPlugin {
+            switch (requested.id.id) {
+                case "com.replaymod.preprocess": {
+                    useModule("com.github.Fallen-Breath:preprocessor:${requested.version}")
+                    break
+                }
+            }
+        }
+    }
+}
+
+Map<String, List<String>> settings = file("settings.json").withReader {
+    new JsonSlurper().parse(it) as Map<String, List<String>>
+}
+
+List<String> versions = settings.get("versions") as List<String>
+File mainProjectFile = file("versions/mainProject")
+
+if (!mainProjectFile.exists()) {
+    throw new IllegalArgumentException("Missing mainProject file: ${mainProjectFile.absolutePath}")
+}
+
+String mainProject = new String(mainProjectFile.readBytes()).trim()
+
+if (!versions.contains(mainProject)) {
+    throw new IllegalArgumentException("Invalid main project: ${mainProject}")
+}
+
+for (String version : versions) {
+    include(":$version")
+    ProjectDescriptor proj = project(":$version")
+    proj.setProjectDir(file("versions/$version"))
+    proj.setBuildFileName("../${mainProject}/build.gradle")
+}
