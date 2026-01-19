@@ -20,7 +20,8 @@ import javax.annotation.Nonnull;
 public class AnisumPlatform {
     public AnisumPlatform() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.addListener(this::serverStarted);
+        modEventBus.addListener(this::addReloadListener);
     }
 
     @SubscribeEvent
