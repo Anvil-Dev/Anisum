@@ -14,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -61,7 +62,9 @@ public class LootTablesUtil {
     public static void lootLoaded(@Nonnull MinecraftServer server, @Nonnull LootTables lootTables) {
         LOOT_TABLE_RESULTS.clear();
         Anisum.LOGGER.info("Processing loot tables");
-        LootContext context = new LootContext.Builder(VersionUtil.overworld(server)).create(new LootContextParamSet.Builder().build());
+        ServerLevel overworld = VersionUtil.overworld(server);
+        if (overworld == null) return;
+        LootContext context = new LootContext.Builder(overworld).create(new LootContextParamSet.Builder().build());
         Set<ResourceLocation> ids = lootTables.getIds();
         for (ResourceLocation id : ids) {
             AnisumConfig config = CONFIGS.values()
