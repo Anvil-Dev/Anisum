@@ -60,6 +60,7 @@ public class LootTablesUtil {
     private static final Map<AnisumConfig, List<Pair<ResourceLocation, ItemStack>>> LOOT_TABLE_RESULTS = new TreeMap<>();
     private static final Map<ResourceLocation, CreativeModeTab> TABS = new HashMap<>();
 
+    @SuppressWarnings("SequencedCollectionMethodCanBeUsed")
     public static void lootLoaded(@Nonnull MinecraftServer server, @Nonnull LootTables lootTables) {
         LOOT_TABLE_RESULTS.clear();
         CONFIGS.sort(Comparator.naturalOrder());
@@ -74,13 +75,13 @@ public class LootTablesUtil {
                 if (id.getPath().contains("/")) continue;
                 LootTable lootTable = lootTables.get(id);
                 LootTableAccessor tableAccessor = (LootTableAccessor) lootTable;
-                LootPool[] pools = tableAccessor.getPools();
-                if (pools.length != 1) continue;
-                LootPool pool = pools[0];
+                List<LootPool> pools = ListArrayUtil.of(tableAccessor.getPools());
+                if (pools.size() != 1) continue;
+                LootPool pool = pools.get(0);
                 LootPoolAccessor poolAccessor = (LootPoolAccessor) pool;
-                LootPoolEntryContainer[] entries = poolAccessor.getEntries();
-                if (entries.length != 1) continue;
-                LootPoolEntryContainer entry = entries[0];
+                List<LootPoolEntryContainer> entries = ListArrayUtil.of(poolAccessor.getEntries());
+                if (entries.size() != 1) continue;
+                LootPoolEntryContainer entry = entries.get(0);
                 if (!(entry instanceof LootItem)) continue;
                 lootTable.getRandomItems(
                     context,
