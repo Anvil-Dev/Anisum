@@ -14,7 +14,6 @@ import java.util.regex.Pattern;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-@SuppressWarnings("ClassCanBeRecord")
 public class AnisumConfig implements Comparable<AnisumConfig> {
     public final boolean inline;
     public final ResourceLocation location;
@@ -107,11 +106,14 @@ public class AnisumConfig implements Comparable<AnisumConfig> {
     private static boolean matches(@Nonnull String pattern, @Nonnull ResourceLocation location) {
         String locStr = location.toString();
         if (pattern.equals(locStr)) return true;
-
+        Pattern pathPattern = Pattern.compile("/");
+        int patternPathCount = pathPattern.matcher(pattern).groupCount();
+        int locPathCount = pathPattern.matcher(locStr).groupCount();
+        if (patternPathCount != locPathCount) return false;
         try {
             String regex;
-            if (pattern.contains("*") && !pattern.contains(".*")) {
-                regex = Pattern.quote(pattern).replace("*", "\\E.*\\Q");
+            if ((pattern.contains("*") || pattern.contains("?")) && !(pattern.contains(".*") || pattern.contains("."))) {
+                regex = Pattern.quote(pattern).replace("*", "\\E.*\\Q").replace("?", "\\E.\\Q");
             } else {
                 regex = pattern;
             }
@@ -124,7 +126,6 @@ public class AnisumConfig implements Comparable<AnisumConfig> {
     public static @Nonnull AnisumConfig createInlineConfig(@Nonnull ResourceLocation location) {
         ArrayList<String> include = new ArrayList<>();
         include.add(String.format("%s:*", location.getNamespace()));
-        //noinspection Java9CollectionFactory
         return new AnisumConfig(
             true,
             location,
@@ -136,7 +137,6 @@ public class AnisumConfig implements Comparable<AnisumConfig> {
     }
 
     @Override
-    @SuppressWarnings("PatternVariableCanBeUsed")
     public boolean equals(Object obj) {
         if (!(obj instanceof AnisumConfig)) return false;
         AnisumConfig config = (AnisumConfig) obj;
