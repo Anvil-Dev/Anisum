@@ -22,7 +22,7 @@
   "accessWidener" : "anisum.classtweaker",
   "entrypoints": {
     "main": [
-      "dev.anvilcraft.resource.anisum.AnisumFabric"
+      "dev.anvilcraft.resource.anisum.AnisumPlatform"
     ]
   },
   "mixins": [

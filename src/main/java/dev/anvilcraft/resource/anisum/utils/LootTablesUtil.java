@@ -34,7 +34,7 @@ public class LootTablesUtil {
 
     public static void lootLoaded(@Nonnull MinecraftServer server, @Nonnull LootTables lootTables) {
         LOOT_TABLE_RESULTS.clear();
-        LootContext context = new LootContext.Builder(server.overworld()).create(new LootContextParamSet.Builder().build());
+        LootContext context = new LootContext.Builder(VersionUtil.overworld(server)).create(new LootContextParamSet.Builder().build());
         Set<ResourceLocation> ids = lootTables.getIds();
         for (ResourceLocation id : ids) {
             try {
