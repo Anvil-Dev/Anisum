@@ -146,6 +146,7 @@ public class LootTablesUtil {
                 () -> {
                     Map<ResourceLocation, AnisumConfig> map = Maps.newHashMap();
 
+                    Anisum.LOGGER.info("Loading Anisum configs");
                     for (ResourceLocation resourceLocation : resourceManager.listResources(
                         Anisum.MOD_ID,
                         stringx -> stringx.endsWith(".json")

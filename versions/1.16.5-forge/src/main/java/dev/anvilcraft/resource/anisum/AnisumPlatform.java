@@ -20,8 +20,7 @@ import javax.annotation.Nonnull;
 public class AnisumPlatform {
     public AnisumPlatform() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
-        MinecraftForge.EVENT_BUS.addListener(this::serverStarted);
-        modEventBus.addListener(this::addReloadListener);
+        MinecraftForge.EVENT_BUS.register(this);
     }
 
     @SubscribeEvent
@@ -32,6 +31,7 @@ public class AnisumPlatform {
 
     @SubscribeEvent
     public void addReloadListener(@Nonnull AddReloadListenerEvent event) {
+        Anisum.LOGGER.info("Add anisum config reload listener...");
         event.addListener(new LootTablesUtil.PreparableAnisumConfigListener());
     }
 
