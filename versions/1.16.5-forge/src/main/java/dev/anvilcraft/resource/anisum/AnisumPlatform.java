@@ -44,7 +44,9 @@ public class AnisumPlatform {
 
     private static void lootLoaded(@Nonnull MinecraftServer server, @Nonnull LootTables lootTables) {
         LootTablesUtil.lootLoaded(server, lootTables);
-        LootTablesUtil.createTabs((id, icon, items) -> new CreativeModeTab(id.toString().replace(":", ".")) {
+        LootTablesUtil.createTabs((id, icon, items) -> new CreativeModeTab(
+                id.toString().replace(":", ".")
+            ) {
                 @Override
                 public ItemStack makeIcon() {
                     return icon.get();
