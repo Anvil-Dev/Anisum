@@ -77,7 +77,6 @@ public class LootTablesUtil {
                     CONFIGS.put(anisumConfig.location, anisumConfig);
                     return anisumConfig;
                 });
-            Anisum.LOGGER.info("Processing loot table {}, current config {}, config include {}", id, config, config.include(id));
             if (!config.include(id)) continue;
             if (config.inline && id.getPath().contains("/")) continue;
             try {
