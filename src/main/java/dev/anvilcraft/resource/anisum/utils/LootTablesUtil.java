@@ -11,7 +11,6 @@ import dev.anvilcraft.resource.anisum.Anisum;
 import dev.anvilcraft.resource.anisum.AnisumConfig;
 import dev.anvilcraft.resource.anisum.mixin.LootPoolAccessor;
 import dev.anvilcraft.resource.anisum.mixin.LootTableAccessor;
-import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -160,11 +159,11 @@ public class LootTablesUtil {
                             for (Resource resource : resourceManager.getResources(resourceLocation)) {
                                 try {
                                     InputStream inputStream = resource.getInputStream();
-                                    Throwable throwable = null;
+                                    Exception throwable = null;
 
                                     try {
                                         Reader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-                                        Throwable throwable1 = null;
+                                        Exception throwable1 = null;
 
                                         try {
                                             JsonObject jsonObject = GsonHelper.fromJson(GSON, reader, JsonObject.class);
@@ -218,29 +217,29 @@ public class LootTablesUtil {
                                                     }
                                                 );
                                             }
-                                        } catch (Throwable var53) {
-                                            throwable1 = var53;
-                                            throw var53;
+                                        } catch (Exception throwable2) {
+                                            throwable1 = throwable2;
+                                            // throw throwable2;
                                         } finally {
                                             if (throwable1 != null) {
                                                 try {
                                                     reader.close();
-                                                } catch (Throwable var52) {
-                                                    throwable1.addSuppressed(var52);
+                                                } catch (Throwable throwable2) {
+                                                    throwable1.addSuppressed(throwable2);
                                                 }
                                             } else {
                                                 reader.close();
                                             }
                                         }
-                                    } catch (Throwable throwable1) {
+                                    } catch (Exception throwable1) {
                                         throwable = throwable1;
-                                        throw throwable1;
+                                        // throw throwable1;
                                     } finally {
                                         if (inputStream != null) {
                                             if (throwable != null) {
                                                 try {
                                                     inputStream.close();
-                                                } catch (Throwable throwable1) {
+                                                } catch (Exception throwable1) {
                                                     throwable.addSuppressed(throwable1);
                                                 }
                                             } else {
