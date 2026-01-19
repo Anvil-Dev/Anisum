@@ -24,13 +24,13 @@ public class AnisumPlatform {
     }
 
     @SubscribeEvent
-    private void serverStarted(@Nonnull FMLServerStartedEvent event) {
+    public void serverStarted(@Nonnull FMLServerStartedEvent event) {
         MinecraftServer server = event.getServer();
         AnisumPlatform.lootLoaded(server, server.getLootTables());
     }
 
     @SubscribeEvent
-    private void addReloadListener(@Nonnull AddReloadListenerEvent event) {
+    public void addReloadListener(@Nonnull AddReloadListenerEvent event) {
         event.addListener(new LootTablesUtil.PreparableAnisumConfigListener());
     }
 
