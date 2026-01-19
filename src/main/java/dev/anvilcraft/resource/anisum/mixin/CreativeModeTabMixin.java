@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(CreativeModeTab.class)
-public class CreativeModeTabMixin implements CreativeModeTabExtension {
+abstract class CreativeModeTabMixin implements CreativeModeTabExtension {
     @Mutable
     @Shadow
     @Final
