@@ -124,6 +124,7 @@ public class LootTablesUtil {
 
     public static ItemStack getIcon(@Nonnull ResourceLocation configLocation) {
         AnisumConfig config = CONFIGS.get(configLocation);
+        Anisum.LOGGER.debug("Getting icon from config {} with id {}", config, configLocation);
         if (config.icon != null) return config.icon;
         List<Pair<ResourceLocation, ItemStack>> pairs = LOOT_TABLE_RESULTS.getOrDefault(configLocation, new ArrayList<>());
         if (pairs.isEmpty()) return Items.BARREL.getDefaultInstance();
