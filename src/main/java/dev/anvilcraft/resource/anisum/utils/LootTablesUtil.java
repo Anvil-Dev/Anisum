@@ -64,6 +64,7 @@ public class LootTablesUtil {
     public static void lootLoaded(@Nonnull MinecraftServer server, @Nonnull LootTables lootTables) {
         LOOT_TABLE_RESULTS.clear();
         CONFIGS.sort(Comparator.naturalOrder());
+        Anisum.LOGGER.info("Processing loot tables");
         LootContext context = new LootContext.Builder(VersionUtil.overworld(server)).create(new LootContextParamSet.Builder().build());
         Set<ResourceLocation> ids = lootTables.getIds();
         for (ResourceLocation id : ids) {
@@ -151,6 +152,7 @@ public class LootTablesUtil {
                         Anisum.MOD_ID,
                         stringx -> stringx.endsWith(".json")
                     )) {
+                        Anisum.LOGGER.info("Loading Anisum config {}:{}", resourceLocation.getNamespace(), resourceLocation.getPath());
                         String string = resourceLocation.getPath();
                         ResourceLocation resourceLocation2 = new ResourceLocation(
                             resourceLocation.getNamespace(),
@@ -222,6 +224,7 @@ public class LootTablesUtil {
                                         } catch (Exception throwable2) {
                                             throwable1 = throwable2;
                                             // throw throwable2;
+                                            Anisum.LOGGER.error(throwable2.getMessage(), throwable2);
                                         } finally {
                                             if (throwable1 != null) {
                                                 try {
@@ -236,6 +239,7 @@ public class LootTablesUtil {
                                     } catch (Exception throwable1) {
                                         throwable = throwable1;
                                         // throw throwable1;
+                                        Anisum.LOGGER.error(throwable1.getMessage(), throwable1);
                                     } finally {
                                         if (inputStream != null) {
                                             if (throwable != null) {
@@ -278,6 +282,7 @@ public class LootTablesUtil {
                 map -> {
                     LootTablesUtil.CONFIGS.clear();
                     map.forEach((key, value) -> LootTablesUtil.CONFIGS.add(value));
+                    Anisum.LOGGER.info("Loaded {} Anisum configs", LootTablesUtil.CONFIGS.size());
                 }, executor2
             );
         }
