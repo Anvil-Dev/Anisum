@@ -15,6 +15,9 @@ public interface VersionUtil {
         return server.overworld();
     }
 
+    //#if MC>=11800 && FORGE
+    //$$ @SuppressWarnings("removal")
+    //#endif
     static @Nonnull ResourceLocation fromNamespaceAndPath(@Nonnull String namespace, @Nonnull String path) {
         return new ResourceLocation(namespace, path);
     }

@@ -169,7 +169,7 @@ public class LootTablesUtil {
                     )) {
                         Anisum.LOGGER.info("Loading Anisum config {}", resourceLocation);
                         String string = resourceLocation.getPath();
-                        ResourceLocation resourceLocation2 = new ResourceLocation(
+                        ResourceLocation resourceLocation2 = VersionUtil.fromNamespaceAndPath(
                             resourceLocation.getNamespace(),
                             string.substring(this.directory.length() + 1, string.length() - PATH_SUFFIX_LENGTH)
                         );
