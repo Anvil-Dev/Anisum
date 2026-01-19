@@ -4,7 +4,11 @@ import dev.anvilcraft.resource.anisum.utils.LootTablesUtil;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.world.level.storage.loot.LootTables;
 
@@ -15,6 +19,7 @@ public class AnisumPlatform implements ModInitializer {
     public void onInitialize() {
         ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(AnisumPlatform::endDataPackReload);
         ServerLifecycleEvents.SERVER_STARTED.register(AnisumPlatform::serverStarted);
+        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new AnisumConfigListener());
     }
 
     private static void serverStarted(MinecraftServer server) {
@@ -38,5 +43,13 @@ public class AnisumPlatform implements ModInitializer {
             .appendItems(items)
             .build()
         );
+    }
+
+    public static class AnisumConfigListener extends LootTablesUtil.PreparableAnisumConfigListener
+        implements IdentifiableResourceReloadListener {
+        @Override
+        public ResourceLocation getFabricId() {
+            return Anisum.location(Anisum.MOD_ID);
+        }
     }
 }

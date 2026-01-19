@@ -6,7 +6,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.JsonOps;
 import dev.anvilcraft.resource.anisum.Anisum;
 import dev.anvilcraft.resource.anisum.AnisumConfig;
 import dev.anvilcraft.resource.anisum.mixin.LootPoolAccessor;
@@ -59,7 +58,6 @@ public class LootTablesUtil {
     private static final Map<ResourceLocation, List<Pair<ResourceLocation, ItemStack>>> LOOT_TABLE_RESULTS = new TreeMap<>();
     private static final Map<ResourceLocation, CreativeModeTab> TABS = new HashMap<>();
 
-    @SuppressWarnings("SequencedCollectionMethodCanBeUsed")
     public static void lootLoaded(@Nonnull MinecraftServer server, @Nonnull LootTables lootTables) {
         LOOT_TABLE_RESULTS.clear();
         Anisum.LOGGER.info("Processing loot tables");
@@ -128,7 +126,6 @@ public class LootTablesUtil {
         if (config.icon != null) return config.icon;
         List<Pair<ResourceLocation, ItemStack>> pairs = LOOT_TABLE_RESULTS.getOrDefault(configLocation, new ArrayList<>());
         if (pairs.isEmpty()) return Items.BARREL.getDefaultInstance();
-        //noinspection SequencedCollectionMethodCanBeUsed
         return pairs.get(0).getSecond();
     }
 
@@ -212,9 +209,7 @@ public class LootTablesUtil {
                                                         }
                                                         AtomicReference<ItemStack> icon = new AtomicReference<>(null);
                                                         if (jsonObject.has("icon")) {
-                                                            ItemStack.CODEC.parse(JsonOps.INSTANCE, jsonObject)
-                                                                .result()
-                                                                .ifPresent(icon::set);
+                                                            VersionUtil.itemStackFromJson(jsonObject.get("icon"), icon);
                                                         }
                                                         List<String> include = new ArrayList<>();
                                                         if (jsonObject.has("include")) {

@@ -1,5 +1,6 @@
 package dev.anvilcraft.resource.anisum;
 
+import dev.anvilcraft.resource.anisum.utils.VersionUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -124,6 +125,7 @@ public class AnisumConfig implements Comparable<AnisumConfig> {
     }
 
     public static @Nonnull AnisumConfig createInlineConfig(@Nonnull ResourceLocation location) {
+        location = VersionUtil.fromNamespaceAndPath(location.getNamespace(), location.getNamespace());
         ArrayList<String> include = new ArrayList<>();
         include.add(String.format("%s:*", location.getNamespace()));
         return new AnisumConfig(
