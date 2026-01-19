@@ -1,9 +1,9 @@
 package dev.anvilcraft.resource.anisum.mixin;
 
+import dev.anvilcraft.resource.anisum.utils.VersionUtil;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
@@ -28,6 +28,6 @@ abstract class ItemMixin {
     ) {
         CompoundTag tag = itemStack.getTag();
         if (tag == null || !tag.contains("id")) return;
-        list.add(new TextComponent(tag.getString("id")).withStyle(ChatFormatting.DARK_GRAY));
+        list.add(VersionUtil.literal(tag.getString("id")).withStyle(ChatFormatting.DARK_GRAY));
     }
 }

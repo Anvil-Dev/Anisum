@@ -6,10 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
-import dev.anvilcraft.resource.anisum.Anisum;
-import dev.anvilcraft.resource.anisum.AnisumConfig;
-import dev.anvilcraft.resource.anisum.mixin.LootPoolAccessor;
-import dev.anvilcraft.resource.anisum.mixin.LootTableAccessor;
+import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -23,13 +20,14 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.LootDataManager;
+import net.minecraft.world.level.storage.loot.LootDataType;
+import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.LootTables;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
-import org.apache.commons.io.IOUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -38,11 +36,11 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -50,36 +48,38 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
+import javax.annotation.ParametersAreNonnullByDefault;
 
+@MethodsReturnNonnullByDefault
+@ParametersAreNonnullByDefault
+@SuppressWarnings("SequencedCollectionMethodCanBeUsed")
 public class LootTablesUtil {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     public static final Map<ResourceLocation, AnisumConfig> CONFIGS = new HashMap<>();
     private static final Map<ResourceLocation, List<Pair<ResourceLocation, ItemStack>>> LOOT_TABLE_RESULTS = new TreeMap<>();
     private static final Map<ResourceLocation, CreativeModeTab> TABS = new HashMap<>();
 
-    public static void lootLoaded(@Nonnull MinecraftServer server, @Nonnull LootTables lootTables) {
+    public static void lootLoaded(MinecraftServer server, LootDataManager lootTables) {
         LOOT_TABLE_RESULTS.clear();
         Anisum.LOGGER.info("Processing loot tables");
         ServerLevel overworld = VersionUtil.overworld(server);
-        if (overworld == null) return;
-        LootContext context = new LootContext.Builder(overworld).create(new LootContextParamSet.Builder().build());
-        Set<ResourceLocation> ids = lootTables.getIds();
-        for (ResourceLocation id : ids) {
+        LootContext context = new LootContext.Builder(new LootParams.Builder(overworld).create((new LootContextParamSet.Builder().build()))).create(null);
+        Collection<ResourceLocation> keys = lootTables.getKeys(LootDataType.TABLE);
+        for (ResourceLocation key : keys) {
             AnisumConfig config = CONFIGS.values()
                 .stream()
                 .sorted()
-                .filter(config1 -> config1.includeNamespace(id))
+                .filter(config1 -> config1.includeNamespace(key))
                 .findFirst()
                 .orElseGet(() -> {
-                    AnisumConfig anisumConfig = AnisumConfig.createInlineConfig(id);
+                    AnisumConfig anisumConfig = AnisumConfig.createInlineConfig(key);
                     CONFIGS.put(anisumConfig.location, anisumConfig);
                     return anisumConfig;
                 });
-            if (!config.include(id)) continue;
-            if (config.inline && id.getPath().contains("/")) continue;
+            if (!config.include(key)) continue;
+            if (config.inline && key.getPath().contains("/")) continue;
             try {
-                LootTable lootTable = lootTables.get(id);
+                LootTable lootTable = lootTables.getLootTable(key);
                 LootTableAccessor tableAccessor = (LootTableAccessor) lootTable;
                 List<LootPool> pools = ListArrayUtil.of(tableAccessor.getPools());
                 if (pools.size() != 1) continue;
@@ -91,10 +91,10 @@ public class LootTablesUtil {
                 if (!(entry instanceof LootItem)) continue;
                 lootTable.getRandomItems(
                     context,
-                    stack -> LOOT_TABLE_RESULTS.computeIfAbsent(config.location, k -> new ArrayList<>()).add(Pair.of(id, stack))
+                    stack -> LOOT_TABLE_RESULTS.computeIfAbsent(config.location, k -> new ArrayList<>()).add(Pair.of(key, stack))
                 );
             } catch (Exception e) {
-                Anisum.LOGGER.error("Error while processing loot table {}", id, e);
+                Anisum.LOGGER.error("Error while processing loot table {}", key, e);
                 throw e;
             }
         }
@@ -122,7 +122,7 @@ public class LootTablesUtil {
         }
     }
 
-    public static ItemStack getIcon(@Nonnull ResourceLocation configLocation) {
+    public static ItemStack getIcon(ResourceLocation configLocation) {
         AnisumConfig config = CONFIGS.get(configLocation);
         if (config.icon != null) return config.icon;
         List<Pair<ResourceLocation, ItemStack>> pairs = LOOT_TABLE_RESULTS.getOrDefault(configLocation, new ArrayList<>());
@@ -130,7 +130,7 @@ public class LootTablesUtil {
         return pairs.get(0).getSecond();
     }
 
-    public static void fillAllItems(@Nonnull ResourceLocation configLocation, @Nonnull List<ItemStack> items) {
+    public static void fillAllItems(ResourceLocation configLocation, List<ItemStack> items) {
         List<Pair<ResourceLocation, ItemStack>> pairs = LOOT_TABLE_RESULTS.getOrDefault(configLocation, new ArrayList<>());
         items.addAll(
             pairs.stream()
@@ -150,7 +150,7 @@ public class LootTablesUtil {
 
         @Override
         public CompletableFuture<Void> reload(
-            @Nonnull PreparationBarrier preparationBarrier,
+            PreparationBarrier preparationBarrier,
             ResourceManager resourceManager,
             ProfilerFiller profilerFiller,
             ProfilerFiller profilerFiller2,
@@ -167,7 +167,7 @@ public class LootTablesUtil {
                         VersionUtil.listResourcePredicate(".json")
                     )
                     //#if MC>=11900
-                    //$$ .keySet()
+                    .keySet()
                     //#endif
                     ) {
                         Anisum.LOGGER.info("Loading Anisum config {}", resourceLocation);
@@ -178,9 +178,9 @@ public class LootTablesUtil {
                         );
 
                         try {
-                            for (Resource resource : resourceManager.getResources(resourceLocation)) {
+                            for (Resource resource : resourceManager.getResourceStack(resourceLocation)) {
                                 try {
-                                    InputStream inputStream = resource.getInputStream();
+                                    InputStream inputStream = resource.open();
                                     Exception throwable = null;
 
                                     try {
@@ -189,55 +189,45 @@ public class LootTablesUtil {
 
                                         try {
                                             JsonObject jsonObject = GsonHelper.fromJson(GSON, reader, JsonObject.class);
-                                            if (jsonObject == null) {
-                                                Anisum.LOGGER.error(
-                                                    "Couldn't load {} tag list {} from {} in data pack {} as it is empty or null",
-                                                    this.directory,
-                                                    resourceLocation2,
-                                                    resourceLocation,
-                                                    resource.getSourceName()
-                                                );
-                                            } else {
-                                                map.computeIfAbsent(
-                                                    resourceLocation2, resourceLocationx -> {
-                                                        // resource.getSourceName()
-                                                        String[] split = resourceLocation2.getPath().split("/");
-                                                        String fileName = split[split.length - 1];
-                                                        Component name;
-                                                        if (jsonObject.has("name")) {
-                                                            name = Component.Serializer.fromJson(jsonObject.get("name"));
-                                                        } else {
-                                                            name = VersionUtil.translatable(String.format(
-                                                                "itemGroup.anisum.%s",
-                                                                fileName
-                                                            ));
-                                                        }
-                                                        AtomicReference<ItemStack> icon = new AtomicReference<>(null);
-                                                        if (jsonObject.has("icon")) {
-                                                            VersionUtil.itemStackFromJson(jsonObject.get("icon"), icon);
-                                                        }
-                                                        List<String> include = new ArrayList<>();
-                                                        if (jsonObject.has("include")) {
-                                                            for (JsonElement element : jsonObject.getAsJsonArray("include")) {
-                                                                include.add(element.getAsString());
-                                                            }
-                                                        }
-                                                        List<String> sort = new ArrayList<>();
-                                                        if (jsonObject.has("sort")) {
-                                                            for (JsonElement element : jsonObject.getAsJsonArray("sort")) {
-                                                                sort.add(element.getAsString());
-                                                            }
-                                                        }
-                                                        return new AnisumConfig(
-                                                            resourceLocation2,
-                                                            name,
-                                                            icon.get(),
-                                                            Collections.unmodifiableList(include),
-                                                            Collections.unmodifiableList(sort)
-                                                        );
+                                            map.computeIfAbsent(
+                                                resourceLocation2, resourceLocationx -> {
+                                                    // resource.getSourceName()
+                                                    String[] split = resourceLocation2.getPath().split("/");
+                                                    String fileName = split[split.length - 1];
+                                                    Component name;
+                                                    if (jsonObject.has("name")) {
+                                                        name = Component.Serializer.fromJson(jsonObject.get("name"));
+                                                    } else {
+                                                        name = VersionUtil.translatable(String.format(
+                                                            "itemGroup.anisum.%s",
+                                                            fileName
+                                                        ));
                                                     }
-                                                );
-                                            }
+                                                    AtomicReference<ItemStack> icon = new AtomicReference<>(null);
+                                                    if (jsonObject.has("icon")) {
+                                                        VersionUtil.itemStackFromJson(jsonObject.get("icon"), icon);
+                                                    }
+                                                    List<String> include = new ArrayList<>();
+                                                    if (jsonObject.has("include")) {
+                                                        for (JsonElement element : jsonObject.getAsJsonArray("include")) {
+                                                            include.add(element.getAsString());
+                                                        }
+                                                    }
+                                                    List<String> sort = new ArrayList<>();
+                                                    if (jsonObject.has("sort")) {
+                                                        for (JsonElement element : jsonObject.getAsJsonArray("sort")) {
+                                                            sort.add(element.getAsString());
+                                                        }
+                                                    }
+                                                    return new AnisumConfig(
+                                                        resourceLocation2,
+                                                        name,
+                                                        icon.get(),
+                                                        Collections.unmodifiableList(include),
+                                                        Collections.unmodifiableList(sort)
+                                                    );
+                                                }
+                                            );
                                         } catch (Exception throwable2) {
                                             throwable1 = throwable2;
                                             // throw throwable2;
@@ -258,16 +248,14 @@ public class LootTablesUtil {
                                         // throw throwable1;
                                         Anisum.LOGGER.error(throwable1.getMessage(), throwable1);
                                     } finally {
-                                        if (inputStream != null) {
-                                            if (throwable != null) {
-                                                try {
-                                                    inputStream.close();
-                                                } catch (Exception throwable1) {
-                                                    throwable.addSuppressed(throwable1);
-                                                }
-                                            } else {
+                                        if (throwable != null) {
+                                            try {
                                                 inputStream.close();
+                                            } catch (Exception throwable1) {
+                                                throwable.addSuppressed(throwable1);
                                             }
+                                        } else {
+                                            inputStream.close();
                                         }
                                     }
                                 } catch (RuntimeException | IOException exception) {
@@ -276,14 +264,14 @@ public class LootTablesUtil {
                                         this.directory,
                                         resourceLocation2,
                                         resourceLocation,
-                                        resource.getSourceName(),
+                                        resource.sourcePackId(),
                                         exception
                                     );
                                 }
                                 //#if MC<11900
-                                finally {
-                                    IOUtils.closeQuietly(resource);
-                                }
+                                //$$ finally {
+                                //$$     IOUtils.closeQuietly(resource);
+                                //$$ }
                                 //#endif
                             }
                         } catch (Exception var59) {

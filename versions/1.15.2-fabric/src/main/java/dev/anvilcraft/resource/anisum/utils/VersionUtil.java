@@ -7,6 +7,9 @@ import dev.anvilcraft.resource.anisum.Anisum;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -14,6 +17,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.dimension.DimensionType;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 import javax.annotation.Nonnull;
 
 public interface VersionUtil {
@@ -39,5 +43,17 @@ public interface VersionUtil {
             }
         }
         icon.set(stack);
+    }
+
+    static Component literal(String key) {
+        return new TextComponent(key);
+    }
+
+    static Component translatable(String key, Object... args) {
+        return new TranslatableComponent(key, args);
+    }
+
+    static Predicate<String> listResourcePredicate(String pathEnd) {
+        return stringx -> stringx.endsWith(pathEnd);
     }
 }

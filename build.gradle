@@ -58,7 +58,7 @@ preprocess {
 
     mc11605_forge.link(mc11701_forge, null)
     mc11701_forge.link(mc11802_forge, null)
-    mc11802_forge.link(mc11902_forge, null)
+    mc11802_forge.link(mc11902_forge, file("versions/mappings-1.18.2-forge-to-1.19.2-forge.txt"))
     mc11902_forge.link(mc11904_forge, null)
     mc11904_forge.link(mc12001_forge, null)
 

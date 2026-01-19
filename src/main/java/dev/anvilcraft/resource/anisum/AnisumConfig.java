@@ -2,7 +2,6 @@ package dev.anvilcraft.resource.anisum;
 
 import dev.anvilcraft.resource.anisum.utils.VersionUtil;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -131,7 +130,7 @@ public class AnisumConfig implements Comparable<AnisumConfig> {
         return new AnisumConfig(
             true,
             location,
-            new TranslatableComponent(String.format("itemGroup.%s.%s", location.getNamespace(), location.getPath())),
+            VersionUtil.translatable(String.format("itemGroup.%s.%s", location.getNamespace(), location.getPath())),
             null,
             Collections.unmodifiableList(include),
             Collections.unmodifiableList(new ArrayList<>())

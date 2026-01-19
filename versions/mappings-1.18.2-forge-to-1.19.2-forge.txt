@@ -1,0 +1,3 @@
+net.minecraft.server.packs.resources.ResourceManager getResources() getResourceStack()
+net.minecraft.server.packs.resources.Resource getInputStream() open()
+net.minecraft.server.packs.resources.Resource getSourceName() sourcePackId()
