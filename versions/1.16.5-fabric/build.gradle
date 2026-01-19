@@ -238,6 +238,7 @@ processResources {
 
     [
             "fabric.mod.json"            : ["fabric"],
+            "pack.mcmeta"                : ["forge"],
             "META-INF"                   : ["forge", "neoforge"],
             "META-INF/mods.toml"         : ["forge", "neoforge", mcVersion < 12005 ? "neoforge" : "none"],
             "META-INF/neoforge.mods.toml": [mcVersion > 12004 ? "neoforge" : "none"]
