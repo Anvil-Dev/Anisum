@@ -3,11 +3,11 @@ package dev.anvilcraft.resource.anisum;
 import dev.anvilcraft.resource.anisum.utils.LootTablesUtil;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootTables;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -27,6 +27,11 @@ public class AnisumPlatform {
     private void serverStarted(@Nonnull FMLServerStartedEvent event) {
         MinecraftServer server = event.getServer();
         AnisumPlatform.lootLoaded(server, server.getLootTables());
+    }
+
+    @SubscribeEvent
+    private void addReloadListener(@Nonnull AddReloadListenerEvent event) {
+        event.addListener(new LootTablesUtil.PreparableAnisumConfigListener());
     }
 
     public static void endDataPackReload(

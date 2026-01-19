@@ -1,11 +1,26 @@
 package dev.anvilcraft.resource.anisum.utils;
 
+import com.google.common.collect.Maps;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.JsonOps;
 import dev.anvilcraft.resource.anisum.Anisum;
+import dev.anvilcraft.resource.anisum.AnisumConfig;
 import dev.anvilcraft.resource.anisum.mixin.LootPoolAccessor;
 import dev.anvilcraft.resource.anisum.mixin.LootTableAccessor;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -16,27 +31,46 @@ import net.minecraft.world.level.storage.loot.LootTables;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
+import org.apache.commons.io.IOUtils;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 
 public class LootTablesUtil {
-    private static final Map<String, List<Pair<ResourceLocation, ItemStack>>> LOOT_TABLE_RESULTS = new HashMap<>();
+    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    public static final List<AnisumConfig> CONFIGS = new ArrayList<>();
+    private static final Map<AnisumConfig, List<Pair<ResourceLocation, ItemStack>>> LOOT_TABLE_RESULTS = new TreeMap<>();
     private static final Map<ResourceLocation, CreativeModeTab> TABS = new HashMap<>();
 
     public static void lootLoaded(@Nonnull MinecraftServer server, @Nonnull LootTables lootTables) {
         LOOT_TABLE_RESULTS.clear();
+        CONFIGS.sort(Comparator.naturalOrder());
         LootContext context = new LootContext.Builder(VersionUtil.overworld(server)).create(new LootContextParamSet.Builder().build());
         Set<ResourceLocation> ids = lootTables.getIds();
         for (ResourceLocation id : ids) {
+            AnisumConfig config = CONFIGS.stream()
+                .filter(config1 -> config1.includeNamespace(id))
+                .findFirst()
+                .orElse(AnisumConfig.createInlineConfig(id));
             try {
                 if (id.getPath().contains("/")) continue;
                 LootTable lootTable = lootTables.get(id);
@@ -51,39 +85,200 @@ public class LootTablesUtil {
                 if (!(entry instanceof LootItem)) continue;
                 lootTable.getRandomItems(
                     context,
-                    stack -> LOOT_TABLE_RESULTS.computeIfAbsent(id.getNamespace(), k -> new ArrayList<>()).add(Pair.of(id, stack))
+                    stack -> LOOT_TABLE_RESULTS.computeIfAbsent(config, k -> new ArrayList<>()).add(Pair.of(id, stack))
                 );
             } catch (Exception e) {
                 Anisum.LOGGER.error("Error while processing loot table {}", id, e);
                 throw e;
             }
         }
-        LOOT_TABLE_RESULTS.values().forEach(pairs -> pairs.sort(Comparator.comparing(a -> a.getFirst().toString())));
+        LOOT_TABLE_RESULTS.forEach((key, value) -> value.sort((pair1, pair2) -> key.sort(pair1.getFirst(), pair2.getFirst())));
     }
 
     public static void createTabs(CreativeModeTabFactory factory) {
-        for (String key : LOOT_TABLE_RESULTS.keySet()) {
-            ResourceLocation location = Anisum.location(key);
+        for (AnisumConfig config : LOOT_TABLE_RESULTS.keySet()) {
+            ResourceLocation location = Anisum.location("empty");
             if (TABS.get(location) == null) {
-                CreativeModeTab tab = factory.create(location, () -> getIcon(key), items -> fillAllItems(key, items));
+                CreativeModeTab tab = factory.create(location, () -> getIcon(config), items -> fillAllItems(config, items));
+                ((CreativeModeTabExtension) tab).anisum$setDisplayName(config.name);
                 TABS.put(location, tab);
             }
         }
     }
 
-    public static ItemStack getIcon(String key) {
-        List<Pair<ResourceLocation, ItemStack>> pairs = LOOT_TABLE_RESULTS.getOrDefault(key, new ArrayList<>());
+    public static ItemStack getIcon(@Nonnull AnisumConfig config) {
+        if (config.icon != null) return config.icon;
+        List<Pair<ResourceLocation, ItemStack>> pairs = LOOT_TABLE_RESULTS.getOrDefault(config, new ArrayList<>());
         if (pairs.isEmpty()) return Items.BARREL.getDefaultInstance();
+        //noinspection SequencedCollectionMethodCanBeUsed
         return pairs.get(0).getSecond();
     }
 
-    public static void fillAllItems(@Nonnull String key, @Nonnull List<ItemStack> items) {
-        List<Pair<ResourceLocation, ItemStack>> pairs = LOOT_TABLE_RESULTS.getOrDefault(key, new ArrayList<>());
-        items.addAll(pairs.stream().map(Pair::getSecond).collect(Collectors.toCollection(ArrayList::new)));
+    public static void fillAllItems(@Nonnull AnisumConfig config, @Nonnull List<ItemStack> items) {
+        List<Pair<ResourceLocation, ItemStack>> pairs = LOOT_TABLE_RESULTS.getOrDefault(config, new ArrayList<>());
+        items.addAll(
+            pairs.stream()
+                .filter(pair -> config.include(pair.getFirst()))
+                .map(Pair::getSecond)
+                .collect(Collectors.toCollection(ArrayList::new))
+        );
     }
 
     @FunctionalInterface
     public interface CreativeModeTabFactory {
         CreativeModeTab create(ResourceLocation id, Supplier<ItemStack> icon, Consumer<List<ItemStack>> items);
+    }
+
+    public static class PreparableAnisumConfigListener implements PreparableReloadListener {
+        private final String directory = Anisum.MOD_ID;
+        private static final int PATH_SUFFIX_LENGTH = ".json".length();
+
+        @Override
+        public CompletableFuture<Void> reload(
+            @Nonnull PreparationBarrier preparationBarrier,
+            ResourceManager resourceManager,
+            ProfilerFiller profilerFiller,
+            ProfilerFiller profilerFiller2,
+            Executor executor,
+            Executor executor2
+        ) {
+            return CompletableFuture.supplyAsync(
+                () -> {
+                    Map<ResourceLocation, AnisumConfig> map = Maps.newHashMap();
+
+                    for (ResourceLocation resourceLocation : resourceManager.listResources(
+                        Anisum.MOD_ID,
+                        stringx -> stringx.endsWith(".json")
+                    )) {
+                        String string = resourceLocation.getPath();
+                        ResourceLocation resourceLocation2 = new ResourceLocation(
+                            resourceLocation.getNamespace(),
+                            string.substring(this.directory.length() + 1, string.length() - PATH_SUFFIX_LENGTH)
+                        );
+
+                        try {
+                            for (Resource resource : resourceManager.getResources(resourceLocation)) {
+                                try {
+                                    InputStream inputStream = resource.getInputStream();
+                                    Throwable throwable = null;
+
+                                    try {
+                                        Reader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+                                        Throwable throwable1 = null;
+
+                                        try {
+                                            JsonObject jsonObject = GsonHelper.fromJson(GSON, reader, JsonObject.class);
+                                            if (jsonObject == null) {
+                                                Anisum.LOGGER.error(
+                                                    "Couldn't load {} tag list {} from {} in data pack {} as it is empty or null",
+                                                    this.directory,
+                                                    resourceLocation2,
+                                                    resourceLocation,
+                                                    resource.getSourceName()
+                                                );
+                                            } else {
+                                                map.computeIfAbsent(
+                                                    resourceLocation2, resourceLocationx -> {
+                                                        // resource.getSourceName()
+                                                        String[] split = resourceLocation2.getPath().split("/");
+                                                        String fileName = split[split.length - 1];
+                                                        Component name;
+                                                        if (jsonObject.has("name")) {
+                                                            name = Component.Serializer.fromJson(jsonObject.get("name"));
+                                                        } else {
+                                                            name = new TranslatableComponent(String.format(
+                                                                "itemGroup.anisum.%s",
+                                                                fileName
+                                                            ));
+                                                        }
+                                                        AtomicReference<ItemStack> icon = new AtomicReference<>(null);
+                                                        if (jsonObject.has("icon")) {
+                                                            ItemStack.CODEC.parse(JsonOps.INSTANCE, jsonObject)
+                                                                .result()
+                                                                .ifPresent(icon::set);
+                                                        }
+                                                        List<String> include = new ArrayList<>();
+                                                        if (jsonObject.has("include")) {
+                                                            for (JsonElement element : jsonObject.getAsJsonArray("include")) {
+                                                                include.add(element.getAsString());
+                                                            }
+                                                        }
+                                                        List<String> sort = new ArrayList<>();
+                                                        if (jsonObject.has("sort")) {
+                                                            for (JsonElement element : jsonObject.getAsJsonArray("sort")) {
+                                                                sort.add(element.getAsString());
+                                                            }
+                                                        }
+                                                        return new AnisumConfig(
+                                                            name,
+                                                            icon.get(),
+                                                            Collections.unmodifiableList(include),
+                                                            Collections.unmodifiableList(sort)
+                                                        );
+                                                    }
+                                                );
+                                            }
+                                        } catch (Throwable var53) {
+                                            throwable1 = var53;
+                                            throw var53;
+                                        } finally {
+                                            if (throwable1 != null) {
+                                                try {
+                                                    reader.close();
+                                                } catch (Throwable var52) {
+                                                    throwable1.addSuppressed(var52);
+                                                }
+                                            } else {
+                                                reader.close();
+                                            }
+                                        }
+                                    } catch (Throwable throwable1) {
+                                        throwable = throwable1;
+                                        throw throwable1;
+                                    } finally {
+                                        if (inputStream != null) {
+                                            if (throwable != null) {
+                                                try {
+                                                    inputStream.close();
+                                                } catch (Throwable throwable1) {
+                                                    throwable.addSuppressed(throwable1);
+                                                }
+                                            } else {
+                                                inputStream.close();
+                                            }
+                                        }
+                                    }
+                                } catch (RuntimeException | IOException exception) {
+                                    Anisum.LOGGER.error(
+                                        "Couldn't read {} tag list {} from {} in data pack {}",
+                                        this.directory,
+                                        resourceLocation2,
+                                        resourceLocation,
+                                        resource.getSourceName(),
+                                        exception
+                                    );
+                                } finally {
+                                    IOUtils.closeQuietly(resource);
+                                }
+                            }
+                        } catch (IOException var59) {
+                            Anisum.LOGGER.error(
+                                "Couldn't read {} tag list {} from {}",
+                                this.directory,
+                                resourceLocation2,
+                                resourceLocation,
+                                var59
+                            );
+                        }
+                    }
+                    return map;
+                }, executor
+            ).thenCompose(preparationBarrier::wait).thenAcceptAsync(
+                map -> {
+                    LootTablesUtil.CONFIGS.clear();
+                    map.forEach((key, value) -> LootTablesUtil.CONFIGS.add(value));
+                }, executor2
+            );
+        }
     }
 }
