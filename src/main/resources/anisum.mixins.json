@@ -5,11 +5,12 @@
   "compatibilityLevel": "JAVA_8",
   "mixins": [
     "CreativeModeTabMixin",
-    "ItemMixin",
     "LootPoolAccessor",
     "LootTableAccessor"
   ],
   "client": [
+    "ItemMixin",
+    "TitleScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1
