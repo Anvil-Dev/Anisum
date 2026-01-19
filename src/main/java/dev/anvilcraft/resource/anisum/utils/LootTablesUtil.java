@@ -40,7 +40,6 @@ import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,24 +55,31 @@ import javax.annotation.Nonnull;
 
 public class LootTablesUtil {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    public static final List<AnisumConfig> CONFIGS = new ArrayList<>();
-    private static final Map<AnisumConfig, List<Pair<ResourceLocation, ItemStack>>> LOOT_TABLE_RESULTS = new TreeMap<>();
+    public static final Map<ResourceLocation, AnisumConfig> CONFIGS = new HashMap<>();
+    private static final Map<ResourceLocation, List<Pair<ResourceLocation, ItemStack>>> LOOT_TABLE_RESULTS = new TreeMap<>();
     private static final Map<ResourceLocation, CreativeModeTab> TABS = new HashMap<>();
 
     @SuppressWarnings("SequencedCollectionMethodCanBeUsed")
     public static void lootLoaded(@Nonnull MinecraftServer server, @Nonnull LootTables lootTables) {
         LOOT_TABLE_RESULTS.clear();
-        CONFIGS.sort(Comparator.naturalOrder());
         Anisum.LOGGER.info("Processing loot tables");
         LootContext context = new LootContext.Builder(VersionUtil.overworld(server)).create(new LootContextParamSet.Builder().build());
         Set<ResourceLocation> ids = lootTables.getIds();
         for (ResourceLocation id : ids) {
-            AnisumConfig config = CONFIGS.stream()
+            AnisumConfig config = CONFIGS.values()
+                .stream()
+                .sorted()
                 .filter(config1 -> config1.includeNamespace(id))
                 .findFirst()
-                .orElse(AnisumConfig.createInlineConfig(id));
+                .orElseGet(() -> {
+                    AnisumConfig anisumConfig = AnisumConfig.createInlineConfig(id);
+                    CONFIGS.put(anisumConfig.location, anisumConfig);
+                    return anisumConfig;
+                });
+            Anisum.LOGGER.info("Processing loot table {}, current config {}, config include {}", id, config, config.include(id));
+            if (!config.include(id)) continue;
+            if (config.inline && id.getPath().contains("/")) continue;
             try {
-                if (id.getPath().contains("/")) continue;
                 LootTable lootTable = lootTables.get(id);
                 LootTableAccessor tableAccessor = (LootTableAccessor) lootTable;
                 List<LootPool> pools = ListArrayUtil.of(tableAccessor.getPools());
@@ -86,40 +92,50 @@ public class LootTablesUtil {
                 if (!(entry instanceof LootItem)) continue;
                 lootTable.getRandomItems(
                     context,
-                    stack -> LOOT_TABLE_RESULTS.computeIfAbsent(config, k -> new ArrayList<>()).add(Pair.of(id, stack))
+                    stack -> LOOT_TABLE_RESULTS.computeIfAbsent(config.location, k -> new ArrayList<>()).add(Pair.of(id, stack))
                 );
             } catch (Exception e) {
                 Anisum.LOGGER.error("Error while processing loot table {}", id, e);
                 throw e;
             }
         }
-        LOOT_TABLE_RESULTS.forEach((key, value) -> value.sort((pair1, pair2) -> key.sort(pair1.getFirst(), pair2.getFirst())));
+        LOOT_TABLE_RESULTS.forEach(
+            (config, value) -> value
+                .sort(
+                    (pair1, pair2) -> CONFIGS.get(config)
+                        .sort(pair1.getFirst(), pair2.getFirst())
+                )
+        );
     }
 
     public static void createTabs(CreativeModeTabFactory factory) {
-        for (AnisumConfig config : LOOT_TABLE_RESULTS.keySet()) {
-            ResourceLocation location = Anisum.location("empty");
-            if (TABS.get(location) == null) {
-                CreativeModeTab tab = factory.create(location, () -> getIcon(config), items -> fillAllItems(config, items));
+        for (ResourceLocation configLocation : LOOT_TABLE_RESULTS.keySet()) {
+            AnisumConfig config = CONFIGS.get(configLocation);
+            if (TABS.get(configLocation) == null) {
+                CreativeModeTab tab = factory.create(
+                    configLocation,
+                    () -> getIcon(configLocation),
+                    items -> fillAllItems(config.location, items)
+                );
                 ((CreativeModeTabExtension) tab).anisum$setDisplayName(config.name);
-                TABS.put(location, tab);
+                TABS.put(configLocation, tab);
             }
         }
     }
 
-    public static ItemStack getIcon(@Nonnull AnisumConfig config) {
+    public static ItemStack getIcon(@Nonnull ResourceLocation configLocation) {
+        AnisumConfig config = CONFIGS.get(configLocation);
         if (config.icon != null) return config.icon;
-        List<Pair<ResourceLocation, ItemStack>> pairs = LOOT_TABLE_RESULTS.getOrDefault(config, new ArrayList<>());
+        List<Pair<ResourceLocation, ItemStack>> pairs = LOOT_TABLE_RESULTS.getOrDefault(configLocation, new ArrayList<>());
         if (pairs.isEmpty()) return Items.BARREL.getDefaultInstance();
         //noinspection SequencedCollectionMethodCanBeUsed
         return pairs.get(0).getSecond();
     }
 
-    public static void fillAllItems(@Nonnull AnisumConfig config, @Nonnull List<ItemStack> items) {
-        List<Pair<ResourceLocation, ItemStack>> pairs = LOOT_TABLE_RESULTS.getOrDefault(config, new ArrayList<>());
+    public static void fillAllItems(@Nonnull ResourceLocation configLocation, @Nonnull List<ItemStack> items) {
+        List<Pair<ResourceLocation, ItemStack>> pairs = LOOT_TABLE_RESULTS.getOrDefault(configLocation, new ArrayList<>());
         items.addAll(
             pairs.stream()
-                .filter(pair -> config.include(pair.getFirst()))
                 .map(Pair::getSecond)
                 .collect(Collectors.toCollection(ArrayList::new))
         );
@@ -152,7 +168,7 @@ public class LootTablesUtil {
                         Anisum.MOD_ID,
                         stringx -> stringx.endsWith(".json")
                     )) {
-                        Anisum.LOGGER.info("Loading Anisum config {}:{}", resourceLocation.getNamespace(), resourceLocation.getPath());
+                        Anisum.LOGGER.info("Loading Anisum config {}", resourceLocation);
                         String string = resourceLocation.getPath();
                         ResourceLocation resourceLocation2 = new ResourceLocation(
                             resourceLocation.getNamespace(),
@@ -213,6 +229,7 @@ public class LootTablesUtil {
                                                             }
                                                         }
                                                         return new AnisumConfig(
+                                                            resourceLocation2,
                                                             name,
                                                             icon.get(),
                                                             Collections.unmodifiableList(include),
@@ -281,7 +298,7 @@ public class LootTablesUtil {
             ).thenCompose(preparationBarrier::wait).thenAcceptAsync(
                 map -> {
                     LootTablesUtil.CONFIGS.clear();
-                    map.forEach((key, value) -> LootTablesUtil.CONFIGS.add(value));
+                    LootTablesUtil.CONFIGS.putAll(map);
                     Anisum.LOGGER.info("Loaded {} Anisum configs", LootTablesUtil.CONFIGS.size());
                 }, executor2
             );

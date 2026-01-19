@@ -17,6 +17,7 @@ import javax.annotation.Nullable;
 @SuppressWarnings("ClassCanBeRecord")
 public class AnisumConfig implements Comparable<AnisumConfig> {
     public final boolean inline;
+    public final ResourceLocation location;
     public final Component name;
     public final @Nullable ItemStack icon;
     /**
@@ -38,12 +39,20 @@ public class AnisumConfig implements Comparable<AnisumConfig> {
      */
     public final List<String> sort;
 
-    public AnisumConfig(Component name, @Nullable ItemStack icon, List<String> include, List<String> sort) {
-        this(false, name, icon, include, sort);
+    public AnisumConfig(ResourceLocation location, Component name, @Nullable ItemStack icon, List<String> include, List<String> sort) {
+        this(false, location, name, icon, include, sort);
     }
 
-    public AnisumConfig(boolean inline, Component name, @Nullable ItemStack icon, List<String> include, List<String> sort) {
+    public AnisumConfig(
+        boolean inline,
+        ResourceLocation location,
+        Component name,
+        @Nullable ItemStack icon,
+        List<String> include,
+        List<String> sort
+    ) {
         this.inline = inline;
+        this.location = location;
         this.name = name;
         this.icon = icon;
         this.include = include;
@@ -118,7 +127,8 @@ public class AnisumConfig implements Comparable<AnisumConfig> {
         //noinspection Java9CollectionFactory
         return new AnisumConfig(
             true,
-            new TranslatableComponent(String.format("itemGroup.anisum.%s", location.getNamespace())),
+            location,
+            new TranslatableComponent(String.format("itemGroup.%s.%s", location.getNamespace(), location.getPath())),
             null,
             Collections.unmodifiableList(include),
             Collections.unmodifiableList(new ArrayList<>())
@@ -155,5 +165,16 @@ public class AnisumConfig implements Comparable<AnisumConfig> {
         if (i != 0) return i;
         if (this.equals(obj)) return 0;
         return this.hashCode() - obj.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "AnisumConfig["
+               + "inline=" + this.inline
+               + ", name=" + this.name.toString()
+               + ", icon=" + this.icon
+               + ", include=" + this.include
+               + ", sort=" + this.sort
+               + "]";
     }
 }
