@@ -68,6 +68,8 @@ dependencies {
             break
         case "forge":
             forge("net.minecraftforge:forge:${project.property("dependencies.minecraft_version")}-${project.property("dependencies.forge_version")}")
+            compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:0.5.3"))
+            implementation(include("io.github.llamalad7:mixinextras-forge:0.5.3"))
             break
         case "neoforge":
             neoForge("net.neoforged:neoforge:${project.property("dependencies.neoforge_version")}")
