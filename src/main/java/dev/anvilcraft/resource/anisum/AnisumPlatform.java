@@ -13,7 +13,6 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.world.level.storage.loot.LootTables;
 
 public class AnisumPlatform implements ModInitializer {
-
     @Override
     public void onInitialize() {
         ServerLifecycleEvents.END_DATA_PACK_RELOAD.register(AnisumPlatform::endDataPackReload);
