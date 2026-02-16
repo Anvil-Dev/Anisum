@@ -16,27 +16,26 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Predicate;
-import javax.annotation.Nonnull;
 
 public interface VersionUtil {
-    static ServerLevel overworld(@Nonnull MinecraftServer server) {
+    static ServerLevel overworld(MinecraftServer server) {
         return server.overworld();
     }
 
     //#if MC>=11800 && FORGE
     //$$ @SuppressWarnings("removal")
     //#endif
-    static @Nonnull ResourceLocation fromNamespaceAndPath(@Nonnull String namespace, @Nonnull String path) {
+    static ResourceLocation fromNamespaceAndPath(String namespace, String path) {
         return new ResourceLocation(namespace, path);
     }
 
-    static void itemStackFromJson(@Nonnull JsonElement element, @Nonnull AtomicReference<ItemStack> icon) {
+    static void itemStackFromJson(JsonElement element, AtomicReference<ItemStack> icon) {
         ItemStack.CODEC.parse(JsonOps.INSTANCE, element)
             .result()
             .ifPresent(icon::set);
     }
 
-    static @Nonnull MutableComponent literal(@Nonnull String key) {
+    static MutableComponent literal(String key) {
         //#if MC>=11900
         //$$ return Component.literal(key);
         //#else
@@ -44,7 +43,7 @@ public interface VersionUtil {
         //#endif
     }
 
-    static @Nonnull MutableComponent translatable(@Nonnull String key, Object... args) {
+    static MutableComponent translatable(String key, Object... args) {
         //#if MC>=11900
         //$$ return Component.translatable(key, args);
         //#else
@@ -57,7 +56,7 @@ public interface VersionUtil {
     //$$     return location -> location.getPath().endsWith(pathEnd);
     //$$ }
     //#else
-    static @Nonnull Predicate<String> listResourcePredicate(@Nonnull String pathEnd) {
+    static Predicate<String> listResourcePredicate(String pathEnd) {
         return stringx -> stringx.endsWith(pathEnd);
     }
     //#endif

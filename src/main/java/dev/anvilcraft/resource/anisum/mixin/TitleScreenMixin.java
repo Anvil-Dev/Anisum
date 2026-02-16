@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import javax.annotation.Nonnull;
 
 @Mixin(TitleScreen.class)
-public class TitleScreenMixin {
+abstract class TitleScreenMixin {
     @Definition(id = "allowsMultiplayer", method = "Lnet/minecraft/client/Minecraft;allowsMultiplayer()Z")
     @Expression("? = ?.allowsMultiplayer()")
     @Inject(

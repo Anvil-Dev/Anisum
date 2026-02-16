@@ -50,7 +50,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 
 public class LootTablesUtil {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -58,7 +57,7 @@ public class LootTablesUtil {
     private static final Map<ResourceLocation, List<Pair<ResourceLocation, ItemStack>>> LOOT_TABLE_RESULTS = new TreeMap<>();
     private static final Map<ResourceLocation, CreativeModeTab> TABS = new HashMap<>();
 
-    public static void lootLoaded(@Nonnull MinecraftServer server, @Nonnull LootTables lootTables) {
+    public static void lootLoaded(MinecraftServer server, LootTables lootTables) {
         LOOT_TABLE_RESULTS.clear();
         Anisum.LOGGER.info("Processing loot tables");
         ServerLevel overworld = VersionUtil.overworld(server);
@@ -122,7 +121,7 @@ public class LootTablesUtil {
         }
     }
 
-    public static ItemStack getIcon(@Nonnull ResourceLocation configLocation) {
+    public static ItemStack getIcon(ResourceLocation configLocation) {
         AnisumConfig config = CONFIGS.get(configLocation);
         Anisum.LOGGER.debug("Getting icon from config {} with id {}", config, configLocation);
         if (config.icon != null) return config.icon;
@@ -131,7 +130,7 @@ public class LootTablesUtil {
         return pairs.get(0).getSecond();
     }
 
-    public static void fillAllItems(@Nonnull ResourceLocation configLocation, @Nonnull List<ItemStack> items) {
+    public static void fillAllItems(ResourceLocation configLocation, List<ItemStack> items) {
         List<Pair<ResourceLocation, ItemStack>> pairs = LOOT_TABLE_RESULTS.getOrDefault(configLocation, new ArrayList<>());
         items.addAll(
             pairs.stream()
@@ -151,7 +150,7 @@ public class LootTablesUtil {
 
         @Override
         public CompletableFuture<Void> reload(
-            @Nonnull PreparationBarrier preparationBarrier,
+            PreparationBarrier preparationBarrier,
             ResourceManager resourceManager,
             ProfilerFiller profilerFiller,
             ProfilerFiller profilerFiller2,

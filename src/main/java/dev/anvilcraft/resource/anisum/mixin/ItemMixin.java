@@ -14,15 +14,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
-import javax.annotation.Nonnull;
 
 @Mixin(Item.class)
 abstract class ItemMixin {
     @Inject(method = "appendHoverText", at = @At("TAIL"))
     private void appendHoverText(
-        @Nonnull ItemStack itemStack,
+        ItemStack itemStack,
         Level level,
-        @Nonnull List<Component> list,
+        List<Component> list,
         TooltipFlag tooltipFlag,
         CallbackInfo ci
     ) {

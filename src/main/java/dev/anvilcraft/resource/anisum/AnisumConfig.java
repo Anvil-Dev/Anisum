@@ -4,14 +4,12 @@ import dev.anvilcraft.resource.anisum.utils.VersionUtil;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class AnisumConfig implements Comparable<AnisumConfig> {
@@ -27,7 +25,7 @@ public class AnisumConfig implements Comparable<AnisumConfig> {
      * 通配符：namespace:path1/path2/*_cell
      * 正则表达式：namespace:path1/path2/.*_cell
      */
-    public final List<String> include;
+    public final @Nullable List<String> include;
     /**
      * 战利品表的顺序定义
      * </p>
@@ -36,7 +34,7 @@ public class AnisumConfig implements Comparable<AnisumConfig> {
      * 通配符：namespace:path1/path2/*_cell
      * 正则表达式：namespace:path1/path2/.*_cell
      */
-    public final List<String> sort;
+    public final @Nullable List<String> sort;
 
     public AnisumConfig(ResourceLocation location, Component name, @Nullable ItemStack icon, List<String> include, List<String> sort) {
         this(false, location, name, icon, include, sort);
@@ -47,8 +45,8 @@ public class AnisumConfig implements Comparable<AnisumConfig> {
         ResourceLocation location,
         Component name,
         @Nullable ItemStack icon,
-        List<String> include,
-        List<String> sort
+        @Nullable List<String> include,
+        @Nullable List<String> sort
     ) {
         this.inline = inline;
         this.location = location;
@@ -59,6 +57,7 @@ public class AnisumConfig implements Comparable<AnisumConfig> {
     }
 
     public boolean includeNamespace(ResourceLocation location) {
+        if (this.include == null) return false;
         for (String s : this.include) {
             String[] split = s.split(":");
             String namespace;
@@ -103,7 +102,7 @@ public class AnisumConfig implements Comparable<AnisumConfig> {
         return Integer.MAX_VALUE;
     }
 
-    private static boolean matches(@Nonnull String pattern, @Nonnull ResourceLocation location) {
+    private static boolean matches(String pattern, ResourceLocation location) {
         String locStr = location.toString();
         if (pattern.equals(locStr)) return true;
         Pattern pathPattern = Pattern.compile("/");
@@ -123,7 +122,7 @@ public class AnisumConfig implements Comparable<AnisumConfig> {
         }
     }
 
-    public static @Nonnull AnisumConfig createInlineConfig(@Nonnull ResourceLocation location) {
+    public static AnisumConfig createInlineConfig(ResourceLocation location) {
         location = VersionUtil.fromNamespaceAndPath(location.getNamespace(), location.getNamespace());
         ArrayList<String> include = new ArrayList<>();
         include.add(String.format("%s:*", location.getNamespace()));
@@ -144,8 +143,8 @@ public class AnisumConfig implements Comparable<AnisumConfig> {
         return this.inline == config.inline
                && this.name.equals(config.name)
                && Objects.equals(this.icon, config.icon)
-               && this.include.equals(config.include)
-               && this.sort.equals(config.sort);
+               && Objects.equals(this.include, config.include)
+               && Objects.equals(this.sort, config.sort);
     }
 
     @Override
@@ -153,12 +152,12 @@ public class AnisumConfig implements Comparable<AnisumConfig> {
         return Boolean.hashCode(this.inline)
                ^ this.name.hashCode()
                ^ Objects.hashCode(this.icon)
-               ^ this.include.hashCode()
-               ^ this.sort.hashCode();
+               ^ Objects.hashCode(this.include)
+               ^ Objects.hashCode(this.sort);
     }
 
     @Override
-    public int compareTo(@NotNull AnisumConfig obj) {
+    public int compareTo(AnisumConfig obj) {
         if (this.inline != obj.inline) {
             return this.inline ? 1 : -1;
         }
@@ -172,7 +171,7 @@ public class AnisumConfig implements Comparable<AnisumConfig> {
     public String toString() {
         return "AnisumConfig["
                + "inline=" + this.inline
-               + ", name=" + this.name.toString()
+               + ", name=" + this.name
                + ", icon=" + this.icon
                + ", include=" + this.include
                + ", sort=" + this.sort

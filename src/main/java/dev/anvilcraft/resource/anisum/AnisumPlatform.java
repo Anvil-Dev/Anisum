@@ -12,8 +12,6 @@ import net.minecraft.server.ServerResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.level.storage.loot.LootTables;
 
-import javax.annotation.Nonnull;
-
 public class AnisumPlatform implements ModInitializer {
 
     @Override
@@ -29,15 +27,15 @@ public class AnisumPlatform implements ModInitializer {
 
 
     private static void endDataPackReload(
-        @Nonnull MinecraftServer server,
-        @Nonnull ServerResources serverResourceManager,
+        MinecraftServer server,
+        ServerResources serverResourceManager,
         boolean success
     ) {
         LootTables lootTables = serverResourceManager.getLootTables();
         AnisumPlatform.lootLoaded(server, lootTables);
     }
 
-    private static void lootLoaded(@Nonnull MinecraftServer server, @Nonnull LootTables lootTables) {
+    private static void lootLoaded(MinecraftServer server, LootTables lootTables) {
         LootTablesUtil.lootLoaded(server, lootTables);
         LootTablesUtil.createTabs((id, icon, items) -> FabricItemGroupBuilder.create(id).icon(icon).appendItems(items).build());
     }
