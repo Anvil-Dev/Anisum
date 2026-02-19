@@ -225,10 +225,10 @@ tasks.register("copyAllJars", Copy) {
         dependsOn subproject.tasks.named("build")
         var modVersion = getModVersion(subproject)
         libs.from(subproject.layout.buildDirectory.dir("libs")) {
-            include("*-${modVersion}.jar")
+            include "*-${modVersion}.jar"
         }
         devlibs.from(subproject.layout.buildDirectory.dir("devlibs")) {
-            include("*-${modVersion}.jar")
+            include "*-${modVersion}.jar"
         }
     }
     doFirst {
@@ -238,6 +238,6 @@ tasks.register("copyAllJars", Copy) {
     into(layout.buildDirectory)
     libs.into("libs")
     devlibs.into("devlibs")
-    it.with(devlibs)
+    it.with(libs, devlibs)
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
