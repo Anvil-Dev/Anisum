@@ -67,3 +67,5 @@ for (String version : versions) {
     proj.setProjectDir(file("versions/$version"))
     proj.setBuildFileName("../${mainProject}/build.gradle")
 }
+
+rootProject.name = "Anisum"
