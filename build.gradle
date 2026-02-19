@@ -219,19 +219,25 @@ tasks.register("cleanPreprocessSources") {
 }
 
 tasks.register("copyAllJars", Copy) {
+    var libs = it.rootSpec.addChild()
+    var devlibs = it.rootSpec.addChild()
     subprojects.forEach { subproject ->
         dependsOn subproject.tasks.named("build")
         var modVersion = getModVersion(subproject)
-        from(subproject.layout.buildDirectory.dir("libs")) {
-            include "*-${modVersion}.jar"
+        libs.from(subproject.layout.buildDirectory.dir("libs")) {
+            include("*-${modVersion}.jar")
         }
-        from(subproject.layout.buildDirectory.dir("devlibs")) {
-            include "*-${modVersion}.jar"
+        devlibs.from(subproject.layout.buildDirectory.dir("devlibs")) {
+            include("*-${modVersion}.jar")
         }
     }
     doFirst {
         delete layout.buildDirectory.dir("libs")
+        delete layout.buildDirectory.dir("devlibs")
     }
-    into(layout.buildDirectory.dir("libs"))
-    duplicatesStrategy DuplicatesStrategy.INCLUDE
+    into(layout.buildDirectory)
+    libs.into("libs")
+    devlibs.into("devlibs")
+    it.with(devlibs)
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
 }
