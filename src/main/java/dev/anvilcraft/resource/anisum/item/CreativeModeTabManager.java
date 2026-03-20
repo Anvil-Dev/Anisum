@@ -12,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.core.MappedRegistry;
-import net.minecraft.core.RegistrationInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -49,18 +48,21 @@ public class CreativeModeTabManager {
         if (tabRegistry instanceof MappedRegistry<CreativeModeTab> mappedTabRegistry) {
             //noinspection deprecation
             mappedTabRegistry.unfreeze(true);
-            List<RegistryItemHolder<CreativeModeTab>> removed = new ArrayList<>();
+            List<RegistryItemHolder<CreativeModeTab>> tabs = new ArrayList<>();
             for (Identifier identifier : mappedTabRegistry.keySet()) {
                 CreativeModeTab value = mappedTabRegistry.getValue(identifier);
-                if (value instanceof AnisumCreativeModeTab tab) {
-                    removed.add(new RegistryItemHolder<>(identifier, tab));
+                if (value == null || value instanceof AnisumCreativeModeTab) {
+                    continue;
                 }
+                tabs.add(new RegistryItemHolder<>(identifier, value));
             }
-            for (RegistryItemHolder<CreativeModeTab> tab : removed) {
-                mappedTabRegistry.anisum$remove(tab);
+            mappedTabRegistry.anisum$clear();
+            for (RegistryItemHolder<CreativeModeTab> tab : tabs) {
+                Registry.register(mappedTabRegistry, ResourceKey.create(Registries.CREATIVE_MODE_TAB, tab.identifier()), tab.value());
             }
             for (AnisumTabSyncPayload payload : this.payloads) {
-                mappedTabRegistry.register(
+                Registry.register(
+                    mappedTabRegistry,
                     ResourceKey.create(Registries.CREATIVE_MODE_TAB, payload.identifier()),
                     new AnisumCreativeModeTab(
                         CreativeModeTab.builder()
@@ -72,8 +74,7 @@ public class CreativeModeTabManager {
                                     output.accept(item.itemStack());
                                 }
                             })
-                    ),
-                    RegistrationInfo.BUILT_IN
+                    )
                 );
             }
             mappedTabRegistry.freeze();
