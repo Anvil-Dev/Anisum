@@ -3,10 +3,7 @@ package dev.anvilcraft.resource.anisum.feat;
 import com.mojang.serialization.JsonOps;
 import dev.anvilcraft.resource.anisum.Anisum;
 import dev.anvilcraft.resource.anisum.AnisumConfig;
-import dev.anvilcraft.resource.anisum.annotations.Side;
-import dev.anvilcraft.resource.anisum.utils.SideDist;
 import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.ReloadableServerResources;
@@ -26,15 +23,13 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 @EventBusSubscriber
-@Side(SideDist.SERVER)
-@Slf4j
 public class AnisumConfigManager extends SimplePreparableReloadListener<Map<Identifier, AnisumConfig>> {
-    @Getter
-    private Map<Identifier, AnisumConfig> configs = new HashMap<>();
     private final ReloadableServerResources serverResources;
     private final FileToIdConverter CONFIG_LISTER = FileToIdConverter.json(Anisum.MOD_ID);
     @Getter
     private final AnisumLootTablesLoader lootTablesLoader = new AnisumLootTablesLoader();
+    @Getter
+    private Map<Identifier, AnisumConfig> configs = new HashMap<>();
 
     public AnisumConfigManager(ReloadableServerResources serverResources) {
         this.serverResources = serverResources;
@@ -63,6 +58,6 @@ public class AnisumConfigManager extends SimplePreparableReloadListener<Map<Iden
     @Override
     protected void apply(Map<Identifier, AnisumConfig> anisumConfig, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         this.configs = anisumConfig;
-        log.info("Loaded {} anisum configs", anisumConfig.size());
+        Anisum.LOGGER.info("Loaded {} anisum configs", anisumConfig.size());
     }
 }

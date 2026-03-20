@@ -2,12 +2,9 @@ package dev.anvilcraft.resource.anisum.feat;
 
 import dev.anvilcraft.resource.anisum.Anisum;
 import dev.anvilcraft.resource.anisum.AnisumConfig;
-import dev.anvilcraft.resource.anisum.annotations.Side;
 import dev.anvilcraft.resource.anisum.network.AnisumSyncStartPayload;
 import dev.anvilcraft.resource.anisum.network.AnisumTabSyncPayload;
 import dev.anvilcraft.resource.anisum.utils.AnisumItem;
-import dev.anvilcraft.resource.anisum.utils.SideDist;
-import lombok.extern.slf4j.Slf4j;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -35,13 +32,37 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
-@Side(SideDist.SERVER)
 @EventBusSubscriber(modid = Anisum.MOD_ID)
-@Slf4j
 public class AnisumLootTablesLoader {
     public final Map<AnisumConfig, Set<AnisumItem>> items = new HashMap<>();
 
     public AnisumLootTablesLoader() {
+    }
+
+    @SubscribeEvent
+    public static void onDatapackSync(OnDatapackSyncEvent event) {
+        MinecraftServer server = event.getPlayerList().getServer();
+        ServerPlayer player = event.getPlayer();
+        AnisumLootTablesLoader loader = server.anisum$getConfigManager().getLootTablesLoader();
+        if (player != null) {
+            loader.syncLoots(player);
+        } else {
+            loader.lootLoaded(server);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onDatapackLoaded(LevelEvent.Load event) {
+        LevelAccessor level = event.getLevel();
+        if (level.isClientSide()) {
+            return;
+        }
+        MinecraftServer server = level.getServer();
+        if (server == null) {
+            return;
+        }
+        AnisumLootTablesLoader loader = server.anisum$getConfigManager().getLootTablesLoader();
+        loader.lootLoaded(server);
     }
 
     public void lootLoaded(MinecraftServer server) {
@@ -50,7 +71,6 @@ public class AnisumLootTablesLoader {
             .lookup()
             .lookup(Registries.LOOT_TABLE);
         if (lookup.isEmpty()) return;
-        log.info("Processing loot tables");
         var overworld = server.overworld();
         LootParams params = new LootParams.Builder(overworld).create(ContextKeySet.EMPTY);
         LootContext context = new LootContext.Builder(params).create(Optional.empty());
@@ -96,32 +116,6 @@ public class AnisumLootTablesLoader {
                 entry.getValue()
             ));
         }
-    }
-
-    @SubscribeEvent
-    public static void onDatapackSync(OnDatapackSyncEvent event) {
-        MinecraftServer server = event.getPlayerList().getServer();
-        ServerPlayer player = event.getPlayer();
-        AnisumLootTablesLoader loader = server.anisum$getConfigManager().getLootTablesLoader();
-        if (player != null) {
-            loader.syncLoots(player);
-        } else {
-            loader.lootLoaded(server);
-        }
-    }
-
-    @SubscribeEvent
-    public static void onDatapackLoaded(LevelEvent.Load event) {
-        LevelAccessor level = event.getLevel();
-        if (level.isClientSide()) {
-            return;
-        }
-        MinecraftServer server = level.getServer();
-        if (server == null) {
-            return;
-        }
-        AnisumLootTablesLoader loader = server.anisum$getConfigManager().getLootTablesLoader();
-        loader.lootLoaded(server);
     }
 
     public void syncLoots(ServerPlayer player) {

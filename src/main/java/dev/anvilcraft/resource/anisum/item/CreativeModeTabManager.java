@@ -1,13 +1,10 @@
 package dev.anvilcraft.resource.anisum.item;
 
 import com.mojang.blaze3d.platform.Window;
-import dev.anvilcraft.resource.anisum.annotations.Side;
 import dev.anvilcraft.resource.anisum.network.AnisumTabSyncPayload;
 import dev.anvilcraft.resource.anisum.network.RegistryItemHolder;
-import dev.anvilcraft.resource.anisum.utils.SideDist;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.core.MappedRegistry;
@@ -23,14 +20,12 @@ import net.neoforged.neoforge.common.CreativeModeTabRegistry;
 import java.util.ArrayList;
 import java.util.List;
 
-@Side(SideDist.CLIENT)
-@Slf4j
 public class CreativeModeTabManager {
+    private final List<AnisumTabSyncPayload> payloads = new ArrayList<>();
     @Getter
     private boolean loading = false;
     @Setter
     private int count = -1;
-    private final List<AnisumTabSyncPayload> payloads = new ArrayList<>();
 
     public void addPayload(AnisumTabSyncPayload payload) {
         this.payloads.add(payload);
@@ -85,6 +80,5 @@ public class CreativeModeTabManager {
         this.count = -1;
         this.payloads.clear();
         this.loading = false;
-        log.info("Finished syncing creative mode tabs");
     }
 }

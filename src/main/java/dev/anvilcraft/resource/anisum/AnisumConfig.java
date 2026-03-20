@@ -65,6 +65,37 @@ public record AnisumConfig(
         this(false, location, name, icon, include, sort);
     }
 
+    private static boolean matches(String pattern, Identifier location) {
+        String locStr = location.toString();
+        if (pattern.equals(locStr)) return true;
+        int patternPathCount = pattern.split("/").length - 1;
+        int locPathCount = locStr.split("/").length - 1;
+        if (patternPathCount != locPathCount) return false;
+        try {
+            String regex;
+            if ((pattern.contains("*") || pattern.contains("?")) && !(pattern.contains(".*") || pattern.contains("."))) {
+                regex = Pattern.quote(pattern).replace("*", "\\E.*\\Q").replace("?", "\\E.\\Q");
+            } else {
+                regex = pattern;
+            }
+            return locStr.matches(regex);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public static AnisumConfig createInlineConfig(Identifier location) {
+        location = VersionUtil.fromNamespaceAndPath(location.getNamespace(), location.getNamespace());
+        return new AnisumConfig(
+            true,
+            location,
+            VersionUtil.translatable(String.format("itemGroup.%s.%s", location.getNamespace(), location.getPath())),
+            ItemStack.EMPTY,
+            VersionUtil.listOf(String.format("%s:*", location.getNamespace())),
+            VersionUtil.listOf()
+        );
+    }
+
     public boolean includeNamespace(Identifier location) {
         for (String s : this.include) {
             String[] split = s.split(":");
@@ -107,37 +138,6 @@ public record AnisumConfig(
             }
         }
         return Integer.MAX_VALUE;
-    }
-
-    private static boolean matches(String pattern, Identifier location) {
-        String locStr = location.toString();
-        if (pattern.equals(locStr)) return true;
-        int patternPathCount = pattern.split("/").length - 1;
-        int locPathCount = locStr.split("/").length - 1;
-        if (patternPathCount != locPathCount) return false;
-        try {
-            String regex;
-            if ((pattern.contains("*") || pattern.contains("?")) && !(pattern.contains(".*") || pattern.contains("."))) {
-                regex = Pattern.quote(pattern).replace("*", "\\E.*\\Q").replace("?", "\\E.\\Q");
-            } else {
-                regex = pattern;
-            }
-            return locStr.matches(regex);
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    public static AnisumConfig createInlineConfig(Identifier location) {
-        location = VersionUtil.fromNamespaceAndPath(location.getNamespace(), location.getNamespace());
-        return new AnisumConfig(
-            true,
-            location,
-            VersionUtil.translatable(String.format("itemGroup.%s.%s", location.getNamespace(), location.getPath())),
-            ItemStack.EMPTY,
-            VersionUtil.listOf(String.format("%s:*", location.getNamespace())),
-            VersionUtil.listOf()
-        );
     }
 
     @Override

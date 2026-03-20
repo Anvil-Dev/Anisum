@@ -8,7 +8,8 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin implements IMinecraftServerExtension {
-    @Shadow public abstract MinecraftServer.ReloadableResources getServerResources();
+    @Shadow
+    public abstract MinecraftServer.ReloadableResources getServerResources();
 
     @Override
     public AnisumConfigManager anisum$getConfigManager() {

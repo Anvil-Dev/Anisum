@@ -35,20 +35,18 @@ abstract class MappedRegistryMixin<T> extends BaseMappedRegistry<T> implements I
     @Shadow
     @Final
     private ObjectList<Holder.Reference<T>> byId;
-
-    @Shadow
-    public abstract Optional<Holder.Reference<T>> get(int p_205907_);
-
     @Shadow
     @Final
     private Reference2IntMap<T> toId;
+    @Shadow
+    @Final
+    private Map<ResourceKey<T>, RegistrationInfo> registrationInfos;
 
     @Shadow
     public abstract int getId(@Nullable T p_122706_);
 
     @Shadow
-    @Final
-    private Map<ResourceKey<T>, RegistrationInfo> registrationInfos;
+    public abstract Optional<Holder.Reference<T>> get(int p_205907_);
 
     @Override
     public void anisum$clear() {
