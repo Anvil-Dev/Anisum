@@ -1,0 +1,100 @@
+name: Bug Report - Bug反馈
+description: Create a report to help us improve. - 反馈问题，帮助我们改进
+title: "[Bug] "
+labels:
+  - 🐛 bug
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filling in this `issue`, please make sure that there are no similar or duplicate `issues` that have been opened.
+        填写此 `issue` 前，请先确认已经开启的 `issue` 没有类似或重复的 `issue`。
+
+  - type: dropdown
+    id: system
+    attributes:
+      label: OS Version - 操作系统
+      options:
+        - Linux
+        - Windows
+        - MacOS
+    validations:
+      required: true
+
+  - type: input
+    id: mc_version
+    attributes:
+      label: Minecraft Version Details - Minecraft 版本信息
+      description: |
+        What version of Minecraft do you use?
+        你使用的 Minecraft 版本是什么
+      placeholder: Minecraft version
+    validations:
+      required: true
+
+  - type: dropdown
+    id: mod_loader
+    attributes:
+      label: Mod Loader - 模组加载器
+      options:
+        - Forge
+        - NeoForge
+        - Fabric
+        - Quilt
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version Details - 版本信息
+      description: |
+        What version of Mod do you use?
+        你使用的 Mod 版本是什么
+      placeholder: Mod version
+    validations:
+      required: true
+
+  - type: textarea
+    id: exist
+    attributes:
+      label: Existing behavior - 现有行为
+      description: |
+        Please describe the problem you have encountered carefully.
+        请仔细描述你所遇到的问题。
+    validations:
+      required: true
+
+  - type: textarea
+    id: expect
+    attributes:
+      label: Expected behavior - 预期行为
+      description: |
+        Please describe in detail the results you wish to achieve.
+        请仔细描述你要得到的结果。
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: To Reproduce - 复现问题
+      description: |
+        How do you trigger this bug? Please walk us through it step by step.
+        这个bug是怎么触发的？请详细告诉我们是怎样出现这个情况的。
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: know
+    attributes:
+      label: This issue is unique - 这个issue是唯一的
+      options:
+        - label: I have searched the issue tracker and confirmed that there is no identical issue. 我已经搜索问题追踪器并且确认没有相同的 Issue。
+          required: true
+        - label: I admit that I previously checked all options without thorough verification and directly submitted this Issue, and I agree that it can be closed directly. 我承认此前未充分核实便勾选了所有选项并直接提交此 Issue ，且同意该 Issue 可被直接关闭。
+        - label: I confirm that I am currently using the latest snapshot or LTS version of the mod. If not, this issue can be closed directly. 我确认当前使用的是模组的最新快照版本或 LTS 版本，若非如此，此 Issue 可被直接关闭。
+          required: true
+        - label: I promise to provide a detailed description of the encountered issue, along with relevant logs and screenshots, rather than offering incomplete or vague information. 我承诺将详细描述遇到的问题，并提供相关日志与截图，而非提供不完整或模糊的信息。
+          required: true

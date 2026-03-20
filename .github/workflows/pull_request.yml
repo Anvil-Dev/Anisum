@@ -1,0 +1,67 @@
+name: Pull Request Check
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - releases/**
+    paths:
+      - gradle/scripts/**
+      - src/**
+      - build.gradle
+      - dependencies.gradle
+      - gradle.properties
+      - settings.gradle
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      CI_BUILD: true
+      PR_BUILD: true
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: Read Properties
+        id: 'properties'
+        uses: christian-draeger/read-properties@1.1.1
+        with:
+          path: gradle.properties
+          properties: 'mod_id mod_name java_version'
+
+      - name: Setup Java ${{ steps.properties.outputs.java_version }}
+        uses: actions/setup-java@v3.6.0
+        with:
+          distribution: zulu
+          java-version: ${{ steps.properties.outputs.java_version }}
+
+      - name: make gradle wrapper executable
+        if: ${{ runner.os != 'Windows' }}
+        run: chmod +x ./gradlew
+
+      - name: Build with Gradle
+        uses: gradle/actions/setup-gradle@v4.3.1
+
+      - name: Build
+        run: ./gradlew build
+
+      - name: Get Version
+        id: version
+        run: |
+          MESSAGE=$(ls build/libs/* | grep sources.jar -v | grep shadow.jar -v | grep slim.jar -v | awk -F '${{ steps.properties.outputs.mod_id }}-neoforge-|.jar' '{print $2}')
+          echo "version=$MESSAGE" >> $GITHUB_OUTPUT
+
+      - name: capture build artifacts
+        uses: actions/upload-artifact@v4.3.3
+        with:
+          name: "${{ steps.properties.outputs.mod_name }} ${{ steps.version.outputs.version }}"
+          path: build/libs/${{ steps.properties.outputs.mod_id }}-neoforge-${{ steps.version.outputs.version }}.jar
+
+      - name: gametest
+        uses: Anvil-Dev/dedicated-server-launch-test@1.21.1-neoforge
+        with:
+          mod: build/libs/${{ steps.properties.outputs.mod_id }}-neoforge-${{ steps.version.outputs.version }}.jar
+          extra-mods: |
+            anvilcraft:1.21.1-1.5.0+hotfix.1572
+            rhino:2101.2.7-build.81+Rhino-1.21
+            kubejs:2101.7.2-build.348
