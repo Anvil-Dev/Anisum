@@ -5,9 +5,12 @@ parchment = "2025.12.20"
 lombok = "8.7.1"
 modDevGradle = "2.0.140"
 jetbrainsAnnotations = "16.0.2"
+jei = "27.4.0.17"
 
 [libraries]
 jetbrainsAnnotations = { group = "org.jetbrains", name = "annotations", version.ref = "jetbrainsAnnotations" }
+jeiApi = { group = "mezz.jei", name = "jei-1.21.11-neoforge-api", version.ref = "jei" }
+jei = { group = "mezz.jei", name = "jei-1.21.11-neoforge", version.ref = "jei" }
 
 [plugins]
 modDevGradle = { id = "net.neoforged.moddev", version.ref = "modDevGradle" }

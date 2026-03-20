@@ -12,8 +12,8 @@
     "ReloadableServerResourcesMixin"
   ],
   "client": [
-    "AbstractContainerScreenMixin",
     "CreativeModeInventoryScreenMixin",
+    "ItemStackMixin",
     "MinecraftMixin"
   ],
   "server": [

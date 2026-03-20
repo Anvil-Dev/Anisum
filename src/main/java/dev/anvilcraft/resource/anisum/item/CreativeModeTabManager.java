@@ -1,6 +1,8 @@
 package dev.anvilcraft.resource.anisum.item;
 
 import com.mojang.blaze3d.platform.Window;
+import dev.anvilcraft.resource.anisum.event.AnisumTabClearEvent;
+import dev.anvilcraft.resource.anisum.event.AnisumTabLoadedEvent;
 import dev.anvilcraft.resource.anisum.network.AnisumTabSyncPayload;
 import dev.anvilcraft.resource.anisum.network.RegistryItemHolder;
 import lombok.Getter;
@@ -16,12 +18,15 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.neoforge.common.CreativeModeTabRegistry;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class CreativeModeTabManager {
     private final List<AnisumTabSyncPayload> payloads = new ArrayList<>();
+    private final List<AnisumCreativeModeTab> creativeModeTabs = new ArrayList<>();
     @Getter
     private boolean loading = false;
     @Setter
@@ -38,6 +43,8 @@ public class CreativeModeTabManager {
 
     public void end() {
         this.loading = true;
+        NeoForge.EVENT_BUS.post(new AnisumTabClearEvent(Collections.unmodifiableList(this.creativeModeTabs)));
+        this.creativeModeTabs.clear();
         Registry<CreativeModeTab> tabRegistry = BuiltInRegistries.CREATIVE_MODE_TAB;
         if (tabRegistry instanceof MappedRegistry<CreativeModeTab> mappedTabRegistry) {
             //noinspection deprecation
@@ -63,6 +70,7 @@ public class CreativeModeTabManager {
                         .withTabsBefore(CreativeModeTabs.TOOLS_AND_UTILITIES),
                     payload.items()
                 );
+                this.creativeModeTabs.add(tab);
                 Registry.register(
                     mappedTabRegistry,
                     ResourceKey.create(Registries.CREATIVE_MODE_TAB, payload.identifier()),
@@ -76,6 +84,7 @@ public class CreativeModeTabManager {
                 Window window = minecraft.getWindow();
                 screen.init(window.getGuiScaledWidth(), window.getGuiScaledHeight());
             }
+            NeoForge.EVENT_BUS.post(new AnisumTabLoadedEvent(Collections.unmodifiableList(this.creativeModeTabs)));
         }
         this.count = -1;
         this.payloads.clear();

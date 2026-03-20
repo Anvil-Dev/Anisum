@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(Minecraft.class)
-public class MinecraftMixin implements IMinecraftExtension {
+abstract class MinecraftMixin implements IMinecraftExtension {
     @Unique
     public final CreativeModeTabManager anisum$creativeModeTabManager = new CreativeModeTabManager();
 

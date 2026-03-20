@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import java.util.List;
 
 @Mixin(value = CreativeModeTabRegistry.class, remap = false)
-public class CreativeModeTabRegistryMixin {
+abstract class CreativeModeTabRegistryMixin {
     @WrapOperation(
         method = "sortTabs",
         at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z")
