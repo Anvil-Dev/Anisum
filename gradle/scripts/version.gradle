@@ -1,0 +1,22 @@
+String buildType
+String buildNumber = System.getenv("GITHUB_RUN_NUMBER")
+String buildTypeEnv = System.getenv("BUILD_TYPE")
+if (buildTypeEnv == "pr") {
+    buildType = 'pr'
+} else if (buildTypeEnv == "hotfix") {
+    buildType = 'hotfix'
+} else if (buildTypeEnv == "snapshot") {
+    buildType = 'snapshot'
+} else if (buildTypeEnv == "release") {
+    buildType = null
+    buildNumber = null
+} else {
+    buildType = 'build'
+}
+def githubRef = System.getenv("GITHUB_REF")
+if (githubRef != null && githubRef.startsWith("refs/tags/")) {
+    project.version = githubRef.substring(githubRef.lastIndexOf('/') + 1)
+} else {
+    project.version = "${mod_version}" + (buildNumber != null ? "+${buildType}.${buildNumber}" : "")
+}
+project.group = maven_group

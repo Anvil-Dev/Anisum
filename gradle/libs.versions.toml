@@ -1,0 +1,14 @@
+[versions]
+minecraft = "1.21.11"
+neoForge = "21.11.38-beta"
+parchment = "2025.12.20"
+lombok = "8.7.1"
+modDevGradle = "2.0.140"
+jetbrainsAnnotations = "16.0.2"
+
+[libraries]
+jetbrainsAnnotations = { group = "org.jetbrains", name = "annotations", version.ref = "jetbrainsAnnotations" }
+
+[plugins]
+modDevGradle = { id = "net.neoforged.moddev", version.ref = "modDevGradle" }
+lombok = { id = "io.freefair.lombok", version.ref = "lombok" }
