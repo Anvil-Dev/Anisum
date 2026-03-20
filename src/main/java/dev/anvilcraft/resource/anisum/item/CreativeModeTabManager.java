@@ -4,7 +4,6 @@ import com.mojang.blaze3d.platform.Window;
 import dev.anvilcraft.resource.anisum.annotations.Side;
 import dev.anvilcraft.resource.anisum.network.AnisumTabSyncPayload;
 import dev.anvilcraft.resource.anisum.network.RegistryItemHolder;
-import dev.anvilcraft.resource.anisum.utils.AnisumItem;
 import dev.anvilcraft.resource.anisum.utils.SideDist;
 import lombok.Getter;
 import lombok.Setter;
@@ -60,27 +59,24 @@ public class CreativeModeTabManager {
             for (RegistryItemHolder<CreativeModeTab> tab : tabs) {
                 Registry.register(mappedTabRegistry, ResourceKey.create(Registries.CREATIVE_MODE_TAB, tab.identifier()), tab.value());
             }
+            Minecraft minecraft = Minecraft.getInstance();
             for (AnisumTabSyncPayload payload : this.payloads) {
+                AnisumCreativeModeTab tab = new AnisumCreativeModeTab(
+                    CreativeModeTab.builder()
+                        .title(payload.name())
+                        .icon(payload::icon)
+                        .withTabsBefore(CreativeModeTabs.TOOLS_AND_UTILITIES),
+                    payload.items()
+                );
                 Registry.register(
                     mappedTabRegistry,
                     ResourceKey.create(Registries.CREATIVE_MODE_TAB, payload.identifier()),
-                    new AnisumCreativeModeTab(
-                        CreativeModeTab.builder()
-                            .title(payload.name())
-                            .icon(payload::icon)
-                            .withTabsBefore(CreativeModeTabs.SPAWN_EGGS)
-                            .displayItems((itemDisplayParameters, output) -> {
-                                for (AnisumItem item : payload.items()) {
-                                    output.accept(item.itemStack());
-                                }
-                            })
-                    )
+                    tab
                 );
             }
             mappedTabRegistry.freeze();
             //noinspection UnstableApiUsage
             CreativeModeTabRegistry.sortTabs();
-            Minecraft minecraft = Minecraft.getInstance();
             if (minecraft.screen instanceof CreativeModeInventoryScreen screen) {
                 Window window = minecraft.getWindow();
                 screen.init(window.getGuiScaledWidth(), window.getGuiScaledHeight());

@@ -45,6 +45,7 @@ public class AnisumLootTablesLoader {
     }
 
     public void lootLoaded(MinecraftServer server) {
+        this.items.clear();
         Optional<? extends HolderLookup.RegistryLookup<LootTable>> lookup = server.reloadableRegistries()
             .lookup()
             .lookup(Registries.LOOT_TABLE);
