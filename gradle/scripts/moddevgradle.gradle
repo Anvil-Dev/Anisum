@@ -9,10 +9,15 @@ neoForge {
 
     // This line is optional. Access Transformers are automatically detected
     // accessTransformers.add('src/main/resources/META-INF/accesstransformer.cfg')
+    interfaceInjectionData {
+        from 'src/main/resources/interface_injections.json'
+        publish file('src/main/resources/interface_injections.json')
+    }
 
     // Default run configurations.
     // These can be tweaked, removed, or duplicated as needed.
     runs {
+        var isJbr = System.getProperty('java.vm.vendor').contains('JetBrains')
         client {
             client()
 
@@ -52,6 +57,10 @@ neoForge {
             // "REGISTRIES": For firing of registry events.
             // "REGISTRYDUMP": For getting the contents of all registries.
             systemProperty 'forge.logging.markers', 'REGISTRIES'
+
+            if (isJbr) {
+                jvmArgument "-XX:+AllowEnhancedClassRedefinition"
+            }
 
             // Recommended logging level for the console
             // You can set various levels here.

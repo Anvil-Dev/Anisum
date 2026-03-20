@@ -1,0 +1,11 @@
+{
+  "net/minecraft/world/level/storage/loot/LootPool": [
+    "dev/anvilcraft/resource/anisum/extension/ILootPoolExtension"
+  ],
+  "net/minecraft/world/level/storage/loot/LootTable": [
+    "dev/anvilcraft/resource/anisum/extension/ILootTableExtension"
+  ],
+  "net/minecraft/server/ReloadableServerResources": [
+    "dev/anvilcraft/resource/anisum/extension/IReloadableServerResourcesExtension"
+  ]
+}

@@ -38,7 +38,6 @@ public record AnisumConfig(
     List<String> sort
 ) implements Comparable<AnisumConfig> {
     public static final MapCodec<AnisumConfig> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-        Codec.BOOL.fieldOf("inline").forGetter(AnisumConfig::inline),
         Identifier.CODEC.fieldOf("location").forGetter(AnisumConfig::location),
         ComponentSerialization.CODEC.fieldOf("name").forGetter(AnisumConfig::name),
         ItemStack.CODEC.optionalFieldOf("icon", ItemStack.EMPTY).forGetter(AnisumConfig::icon),
@@ -49,8 +48,6 @@ public record AnisumConfig(
     public static final Codec<AnisumConfig> CODEC = AnisumConfig.MAP_CODEC.codec();
 
     public static final StreamCodec<RegistryFriendlyByteBuf, AnisumConfig> STREAM_CODEC = StreamCodec.composite(
-        ByteBufCodecs.BOOL,
-        AnisumConfig::inline,
         Identifier.STREAM_CODEC,
         AnisumConfig::location,
         ComponentSerialization.STREAM_CODEC,

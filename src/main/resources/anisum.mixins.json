@@ -4,12 +4,13 @@
   "package": "dev.anvilcraft.resource.anisum.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "LootPoolMixin",
+    "LootTableMixin",
     "ReloadableServerResourcesMixin"
   ],
   "client": [
   ],
   "server": [
-
   ],
   "injectors": {
     "defaultRequire": 1

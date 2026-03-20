@@ -4,9 +4,9 @@ import com.mojang.serialization.JsonOps;
 import dev.anvilcraft.resource.anisum.Anisum;
 import dev.anvilcraft.resource.anisum.AnisumConfig;
 import dev.anvilcraft.resource.anisum.annotations.Side;
-import dev.anvilcraft.resource.anisum.extension.IReloadableServerResourcesExtension;
 import dev.anvilcraft.resource.anisum.utils.SideDist;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.ReloadableServerResources;
@@ -27,6 +27,7 @@ import java.util.TreeMap;
 
 @EventBusSubscriber
 @Side(SideDist.SERVER)
+@Slf4j
 public class AnisumConfigManager extends SimplePreparableReloadListener<Map<Identifier, AnisumConfig>> {
     @Getter
     private Map<Identifier, AnisumConfig> configs = new HashMap<>();
@@ -40,7 +41,7 @@ public class AnisumConfigManager extends SimplePreparableReloadListener<Map<Iden
     @SubscribeEvent
     public static void addServerReloadListener(AddServerReloadListenersEvent event) {
         ReloadableServerResources serverResources = event.getServerResources();
-        AnisumConfigManager manager = ((IReloadableServerResourcesExtension) serverResources).anisum$getConfigManager();
+        AnisumConfigManager manager = serverResources.anisum$getConfigManager();
         event.addListener(Anisum.of("config"), manager);
     }
 
@@ -60,6 +61,6 @@ public class AnisumConfigManager extends SimplePreparableReloadListener<Map<Iden
     @Override
     protected void apply(Map<Identifier, AnisumConfig> anisumConfig, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         this.configs = anisumConfig;
-        Anisum.LOGGER.info("Loaded {} anisum configs", anisumConfig.size());
+        log.info("Loaded {} anisum configs", anisumConfig.size());
     }
 }
