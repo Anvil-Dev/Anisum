@@ -82,7 +82,7 @@ jobs:
           version: ${{ steps.version.outputs.version }}
           game-versions: 1.21.11
           version-type: ${{ env.VERSION_TYPE }}
-          java: 21
+          java: ${{ steps.properties.outputs.java_version }}
           fail-mode: skip
 
           modrinth-id: ${{ steps.properties.outputs.modrinth_id }}
