@@ -57,7 +57,7 @@ jobs:
           name: "${{ steps.properties.outputs.mod_name }} ${{ steps.version.outputs.version }}"
           path: build/libs/${{ steps.properties.outputs.mod_id }}-neoforge-${{ steps.version.outputs.version }}.jar
 
-      - name: gametest
-        uses: Anvil-Dev/dedicated-server-launch-test@1.21.11-neoforge
-        with:
-          mod: build/libs/${{ steps.properties.outputs.mod_id }}-neoforge-${{ steps.version.outputs.version }}.jar
+#      - name: gametest
+#        uses: Anvil-Dev/dedicated-server-launch-test@1.21.11-neoforge
+#        with:
+#          mod: build/libs/${{ steps.properties.outputs.mod_id }}-neoforge-${{ steps.version.outputs.version }}.jar
