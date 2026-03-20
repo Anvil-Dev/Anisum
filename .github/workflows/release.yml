@@ -73,7 +73,7 @@ jobs:
         with:
           name: "${{ steps.properties.outputs.mod_name }} For NeoForge v${{ steps.version.outputs.version }}"
           version: ${{ steps.version.outputs.version }}
-          game-versions: 1.21.1
+          game-versions: 1.21.11
           version-type: ${{ env.VERSION_TYPE }}
           java: 21
           fail-mode: skip
