@@ -1,7 +1,11 @@
 package dev.anvilcraft.resource.anisum.feat;
 
 import dev.anvilcraft.resource.anisum.Anisum;
+import dev.anvilcraft.resource.anisum.AnisumConfig;
 import dev.anvilcraft.resource.anisum.annotations.Side;
+import dev.anvilcraft.resource.anisum.network.AnisumSyncStartPayload;
+import dev.anvilcraft.resource.anisum.network.AnisumTabSyncPayload;
+import dev.anvilcraft.resource.anisum.utils.AnisumItem;
 import dev.anvilcraft.resource.anisum.utils.SideDist;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.core.HolderLookup;
@@ -11,7 +15,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.context.ContextKeySet;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootPool;
@@ -21,20 +25,26 @@ import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
+import net.neoforged.neoforge.event.level.LevelEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 
 @Side(SideDist.SERVER)
 @EventBusSubscriber(modid = Anisum.MOD_ID)
 @Slf4j
 public class AnisumLootTablesLoader {
-    public static final Map<Identifier, Set<ItemStack>> ITEMS = new HashMap<>();
+    public final Map<AnisumConfig, Set<AnisumItem>> items = new HashMap<>();
 
-    public static void lootLoaded(MinecraftServer server) {
+    public AnisumLootTablesLoader() {
+    }
+
+    public void lootLoaded(MinecraftServer server) {
         Optional<? extends HolderLookup.RegistryLookup<LootTable>> lookup = server.reloadableRegistries()
             .lookup()
             .lookup(Registries.LOOT_TABLE);
@@ -43,11 +53,12 @@ public class AnisumLootTablesLoader {
         var overworld = server.overworld();
         LootParams params = new LootParams.Builder(overworld).create(ContextKeySet.EMPTY);
         LootContext context = new LootContext.Builder(params).create(Optional.empty());
-        Map<Identifier, ItemStack> itemStackMap = new HashMap<>();
+        AnisumConfigManager manager = server.anisum$getConfigManager();
         lookup.get().listElements().forEach(reference -> {
             ResourceKey<LootTable> key = reference.getKey();
             if (key == null) return;
             Identifier identifier = key.identifier();
+            if (identifier.getNamespace().equals("minecraft")) return;
             LootTable lootTable = reference.value();
             List<LootPool> lootPools = lootTable.anisum$getPools();
             if (lootPools.size() != 1) return;
@@ -56,16 +67,76 @@ public class AnisumLootTablesLoader {
             if (entries.size() != 1) return;
             LootPoolEntryContainer entry = entries.getFirst();
             if (!(entry instanceof LootItem)) return;
-            lootTable.getRandomItems(context, stack -> itemStackMap.put(identifier, stack));
+            lootTable.getRandomItems(
+                context, stack -> {
+                    for (AnisumConfig config : manager.getConfigs().values()) {
+                        if (!config.include(identifier)) {
+                            continue;
+                        }
+                        this.items.computeIfAbsent(
+                            config, identifier1 -> new TreeSet<>(
+                                (i1, i2) -> config.sort(i1.identifier(), i2.identifier())
+                            )
+                        ).add(
+                            new AnisumItem(identifier, stack.copy())
+                        );
+                    }
+                }
+            );
         });
-        log.info("loaded loot table with count {}", itemStackMap.size());
+        PacketDistributor.sendToAllPlayers(new AnisumSyncStartPayload(this.items.size()));
+        for (Map.Entry<AnisumConfig, Set<AnisumItem>> entry : this.items.entrySet()) {
+            AnisumConfig config = entry.getKey();
+            Identifier identifier = config.location();
+            PacketDistributor.sendToAllPlayers(new AnisumTabSyncPayload(
+                identifier,
+                config.name(),
+                config.icon(),
+                entry.getValue()
+            ));
+        }
     }
 
     @SubscribeEvent
     public static void onDatapackSync(OnDatapackSyncEvent event) {
         MinecraftServer server = event.getPlayerList().getServer();
         ServerPlayer player = event.getPlayer();
-        if (player != null && !server.isSingleplayerOwner(player.nameAndId())) return;
-        AnisumLootTablesLoader.lootLoaded(server);
+        AnisumLootTablesLoader loader = server.anisum$getConfigManager().getLootTablesLoader();
+        if (player != null) {
+            loader.syncLoots(player);
+        } else {
+            loader.lootLoaded(server);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onDatapackLoaded(LevelEvent.Load event) {
+        LevelAccessor level = event.getLevel();
+        if (level.isClientSide()) {
+            return;
+        }
+        MinecraftServer server = level.getServer();
+        if (server == null) {
+            return;
+        }
+        AnisumLootTablesLoader loader = server.anisum$getConfigManager().getLootTablesLoader();
+        loader.lootLoaded(server);
+    }
+
+    public void syncLoots(ServerPlayer player) {
+        PacketDistributor.sendToPlayer(player, new AnisumSyncStartPayload(this.items.size()));
+        for (Map.Entry<AnisumConfig, Set<AnisumItem>> entry : this.items.entrySet()) {
+            AnisumConfig config = entry.getKey();
+            Identifier identifier = config.location();
+            PacketDistributor.sendToPlayer(
+                player,
+                new AnisumTabSyncPayload(
+                    identifier,
+                    config.name(),
+                    config.icon(),
+                    entry.getValue()
+                )
+            );
+        }
     }
 }

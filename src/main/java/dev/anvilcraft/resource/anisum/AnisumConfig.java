@@ -91,6 +91,7 @@ public record AnisumConfig(
     }
 
     public int sort(Identifier location1, Identifier location2) {
+        if (location1.equals(location2)) return 0;
         int index1 = findMatchIndex(location1);
         int index2 = findMatchIndex(location2);
         if (index1 != index2) {
@@ -111,9 +112,8 @@ public record AnisumConfig(
     private static boolean matches(String pattern, Identifier location) {
         String locStr = location.toString();
         if (pattern.equals(locStr)) return true;
-        Pattern pathPattern = Pattern.compile("/");
-        int patternPathCount = pathPattern.matcher(pattern).groupCount();
-        int locPathCount = pathPattern.matcher(locStr).groupCount();
+        int patternPathCount = pattern.split("/").length - 1;
+        int locPathCount = locStr.split("/").length - 1;
         if (patternPathCount != locPathCount) return false;
         try {
             String regex;

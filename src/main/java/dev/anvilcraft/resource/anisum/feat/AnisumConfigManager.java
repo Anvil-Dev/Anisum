@@ -32,7 +32,9 @@ public class AnisumConfigManager extends SimplePreparableReloadListener<Map<Iden
     @Getter
     private Map<Identifier, AnisumConfig> configs = new HashMap<>();
     private final ReloadableServerResources serverResources;
-    private final FileToIdConverter CONFIG_LISTER = FileToIdConverter.json("anisum");
+    private final FileToIdConverter CONFIG_LISTER = FileToIdConverter.json(Anisum.MOD_ID);
+    @Getter
+    private final AnisumLootTablesLoader lootTablesLoader = new AnisumLootTablesLoader();
 
     public AnisumConfigManager(ReloadableServerResources serverResources) {
         this.serverResources = serverResources;
