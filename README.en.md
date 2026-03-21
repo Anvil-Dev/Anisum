@@ -1,4 +1,10 @@
+<div align="center">
+
 # Anisum
+
+<img src=".idea/icon.png" style="width: 128px; height: 128px" alt="Anisum Logo">
+
+</div>
 
 [中文说明](README.md)
 

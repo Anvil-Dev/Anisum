@@ -1,8 +1,14 @@
-# Anisum
+<div align="center">
+
+# 八角
+
+<img src=".idea/icon.png" style="width: 128px; height: 128px" alt="Anisum Logo">
+
+</div>
 
 [English](README.en.md)
 
-Anisum 是一个基于 NeoForge 的 Minecraft 模组，用于从战利品表中收集物品并同步到客户端创意标签页，便于资源整合与内容浏览。
+八角是一个基于 NeoForge 的 Minecraft 模组，用于从战利品表中收集物品并同步到客户端创意标签页，便于资源整合与内容浏览。
 
 ## 特性
 
