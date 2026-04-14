@@ -7,7 +7,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             groupId = project.group
-            artifactId = project.base.archivesName
+            artifactId = project.base.archivesName.get()
             version = project.version
 
             from components.java
@@ -28,6 +28,8 @@ publishing {
                     password System.getenv("MAVEN_PASSWORD")
                 }
             }
+        } else {
+            mavenLocal()
         }
     }
 }
