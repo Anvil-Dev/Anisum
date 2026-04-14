@@ -1,5 +1,5 @@
 dependencies {
-    compileOnly libs.jetbrainsAnnotations
+    compileOnly libs.jsr305
     compileOnly libs.jeiApi
     runtimeOnly libs.jei
 }
