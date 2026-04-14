@@ -8,7 +8,7 @@ plugins {
 
 apply from: "$rootDir/gradle/scripts/version.gradle"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java.toolchain.languageVersion = JavaLanguageVersion.of(project.java_version)
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 apply from: "$rootDir/gradle/scripts/moddevgradle.gradle"
@@ -26,5 +26,5 @@ idea {
 }
 
 lombok {
-    version = "1.18.34"
+    version = "1.18.44"
 }

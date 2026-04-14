@@ -12,7 +12,6 @@
     "ReloadableServerResourcesMixin"
   ],
   "client": [
-    "CreativeModeInventoryScreenMixin",
     "ItemStackMixin",
     "MinecraftMixin"
   ],

@@ -1,16 +1,15 @@
 [versions]
-minecraft = "1.21.11"
-neoForge = "21.11.38-beta"
-parchment = "2025.12.20"
-lombok = "8.7.1"
+minecraft = "26.1.2"
+neoForge = "26.1.2.8-beta"
+lombok = "9.2.0"
 modDevGradle = "2.0.140"
-jetbrainsAnnotations = "16.0.2"
-jei = "27.4.0.17"
+jsr305 = "3.0.2"
+jei = "29.5.0.26"
 
 [libraries]
-jetbrainsAnnotations = { group = "org.jetbrains", name = "annotations", version.ref = "jetbrainsAnnotations" }
-jeiApi = { group = "mezz.jei", name = "jei-1.21.11-neoforge-api", version.ref = "jei" }
-jei = { group = "mezz.jei", name = "jei-1.21.11-neoforge", version.ref = "jei" }
+jsr305 = { group = "com.google.code.findbugs", name = "jsr305", version.ref = "jsr305" }
+jeiApi = { group = "mezz.jei", name = "jei-26.1.2-neoforge-api", version.ref = "jei" }
+jei = { group = "mezz.jei", name = "jei-26.1.2-neoforge", version.ref = "jei" }
 
 [plugins]
 modDevGradle = { id = "net.neoforged.moddev", version.ref = "modDevGradle" }

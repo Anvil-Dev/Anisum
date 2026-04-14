@@ -2,11 +2,6 @@ neoForge {
     // Specify the version of NeoForge to use.
     version = libs.versions.neoForge.get()
 
-    parchment {
-        mappingsVersion = libs.versions.parchment.get()
-        minecraftVersion = libs.versions.minecraft.get()
-    }
-
     // This line is optional. Access Transformers are automatically detected
     // accessTransformers.add('src/main/resources/META-INF/accesstransformer.cfg')
     interfaceInjectionData {
