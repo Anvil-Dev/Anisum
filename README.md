@@ -19,7 +19,7 @@
 
 ## 兼容与环境
 
-- Minecraft: `1.21.11`
+- Minecraft: `26.1`
 - NeoForge: `21.11.38-beta`
 - Java: `21`
 - Mod ID: `anisum`

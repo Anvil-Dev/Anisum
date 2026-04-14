@@ -69,7 +69,7 @@ jobs:
         continue-on-error: true
 
 #      - name: gametest
-#        uses: Anvil-Dev/dedicated-server-launch-test@1.21.11-neoforge
+#        uses: Anvil-Dev/dedicated-server-launch-test@26.1-neoforge
 #        with:
 #          mod: build/libs/${{ steps.properties.outputs.mod_id }}-neoforge-${{ steps.version.outputs.version }}.jar
 
@@ -80,7 +80,7 @@ jobs:
         with:
           name: "${{ steps.properties.outputs.mod_name }} For NeoForge v${{ steps.version.outputs.version }}"
           version: ${{ steps.version.outputs.version }}
-          game-versions: 1.21.11
+          game-versions: 26.1
           version-type: ${{ env.VERSION_TYPE }}
           java: ${{ steps.properties.outputs.java_version }}
           fail-mode: skip
