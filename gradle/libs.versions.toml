@@ -4,11 +4,11 @@ neoForge = "21.11.38-beta"
 parchment = "2025.12.20"
 lombok = "8.7.1"
 modDevGradle = "2.0.140"
-jetbrainsAnnotations = "16.0.2"
+jsr305 = "3.0.2"
 jei = "27.4.0.17"
 
 [libraries]
-jetbrainsAnnotations = { group = "org.jetbrains", name = "annotations", version.ref = "jetbrainsAnnotations" }
+jsr305 = { group = "com.google.code.findbugs", name = "jsr305", version.ref = "jsr305" }
 jeiApi = { group = "mezz.jei", name = "jei-1.21.11-neoforge-api", version.ref = "jei" }
 jei = { group = "mezz.jei", name = "jei-1.21.11-neoforge", version.ref = "jei" }
 
