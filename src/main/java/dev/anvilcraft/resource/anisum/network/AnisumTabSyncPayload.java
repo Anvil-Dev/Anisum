@@ -8,13 +8,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Set;
 
 public record AnisumTabSyncPayload(
-    Identifier identifier,
+    ResourceLocation identifier,
     Component name,
     ItemStack icon,
     Set<AnisumItem> items
@@ -22,7 +22,7 @@ public record AnisumTabSyncPayload(
     public static final Type<AnisumTabSyncPayload> TYPE = new Type<>(Anisum.of("tab_sync"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, AnisumTabSyncPayload> STREAM_CODEC = StreamCodec.composite(
-        Identifier.STREAM_CODEC,
+        ResourceLocation.STREAM_CODEC,
         AnisumTabSyncPayload::identifier,
         ComponentSerialization.STREAM_CODEC,
         AnisumTabSyncPayload::name,

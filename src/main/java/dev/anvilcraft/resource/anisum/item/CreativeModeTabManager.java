@@ -13,8 +13,8 @@ import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.neoforge.common.CreativeModeTabRegistry;
@@ -50,7 +50,7 @@ public class CreativeModeTabManager {
             //noinspection deprecation
             mappedTabRegistry.unfreeze(true);
             List<RegistryItemHolder<CreativeModeTab>> tabs = new ArrayList<>();
-            for (Identifier identifier : mappedTabRegistry.keySet()) {
+            for (ResourceLocation identifier : mappedTabRegistry.keySet()) {
                 CreativeModeTab value = mappedTabRegistry.getValue(identifier);
                 if (value == null || value instanceof AnisumCreativeModeTab) {
                     continue;
@@ -82,7 +82,7 @@ public class CreativeModeTabManager {
             CreativeModeTabRegistry.sortTabs();
             if (minecraft.screen instanceof CreativeModeInventoryScreen screen) {
                 Window window = minecraft.getWindow();
-                screen.init(window.getGuiScaledWidth(), window.getGuiScaledHeight());
+                screen.init(minecraft, window.getGuiScaledWidth(), window.getGuiScaledHeight());
             }
             NeoForge.EVENT_BUS.post(new AnisumTabLoadedEvent(Collections.unmodifiableList(this.creativeModeTabs)));
         }

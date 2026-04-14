@@ -2,14 +2,14 @@ package dev.anvilcraft.resource.anisum.utils;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.List;
 
 public interface VersionUtil {
-    static Identifier fromNamespaceAndPath(String namespace, String path) {
-        return Identifier.fromNamespaceAndPath(namespace, path);
+    static ResourceLocation fromNamespaceAndPath(String namespace, String path) {
+        return ResourceLocation.fromNamespaceAndPath(namespace, path);
     }
 
     static MutableComponent literal(String key) {

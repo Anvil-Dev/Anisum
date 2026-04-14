@@ -7,7 +7,7 @@ import dev.anvilcraft.resource.anisum.network.AnisumTabSyncPayload;
 import dev.anvilcraft.resource.anisum.utils.AnisumItem;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -78,7 +78,7 @@ public class AnisumLootTablesLoader {
         lookup.get().listElements().forEach(reference -> {
             ResourceKey<LootTable> key = reference.getKey();
             if (key == null) return;
-            Identifier identifier = key.identifier();
+            ResourceLocation identifier = key.location();
             if (identifier.getNamespace().equals("minecraft")) return;
             LootTable lootTable = reference.value();
             List<LootPool> lootPools = lootTable.anisum$getPools();
@@ -108,7 +108,7 @@ public class AnisumLootTablesLoader {
         PacketDistributor.sendToAllPlayers(new AnisumSyncStartPayload(this.items.size()));
         for (Map.Entry<AnisumConfig, Set<AnisumItem>> entry : this.items.entrySet()) {
             AnisumConfig config = entry.getKey();
-            Identifier identifier = config.location();
+            ResourceLocation identifier = config.location();
             PacketDistributor.sendToAllPlayers(new AnisumTabSyncPayload(
                 identifier,
                 config.name(),
@@ -122,7 +122,7 @@ public class AnisumLootTablesLoader {
         PacketDistributor.sendToPlayer(player, new AnisumSyncStartPayload(this.items.size()));
         for (Map.Entry<AnisumConfig, Set<AnisumItem>> entry : this.items.entrySet()) {
             AnisumConfig config = entry.getKey();
-            Identifier identifier = config.location();
+            ResourceLocation identifier = config.location();
             PacketDistributor.sendToPlayer(
                 player,
                 new AnisumTabSyncPayload(

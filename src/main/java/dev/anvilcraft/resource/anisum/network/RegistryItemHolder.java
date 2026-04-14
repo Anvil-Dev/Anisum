@@ -1,6 +1,6 @@
 package dev.anvilcraft.resource.anisum.network;
 
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 
-public record RegistryItemHolder<T>(Identifier identifier, T value) {
+public record RegistryItemHolder<T>(ResourceLocation identifier, T value) {
 }

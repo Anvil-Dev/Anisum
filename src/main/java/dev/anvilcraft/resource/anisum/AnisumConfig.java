@@ -9,7 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
@@ -31,14 +31,14 @@ import java.util.regex.Pattern;
  */
 public record AnisumConfig(
     boolean inline,
-    Identifier location,
+    ResourceLocation location,
     Component name,
     ItemStack icon,
     List<String> include,
     List<String> sort
 ) implements Comparable<AnisumConfig> {
     public static final MapCodec<AnisumConfig> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-        Identifier.CODEC.fieldOf("location").forGetter(AnisumConfig::location),
+        ResourceLocation.CODEC.fieldOf("location").forGetter(AnisumConfig::location),
         ComponentSerialization.CODEC.fieldOf("name").forGetter(AnisumConfig::name),
         ItemStack.CODEC.optionalFieldOf("icon", ItemStack.EMPTY).forGetter(AnisumConfig::icon),
         Codec.list(Codec.STRING).optionalFieldOf("include", VersionUtil.listOf()).forGetter(AnisumConfig::include),
@@ -48,7 +48,7 @@ public record AnisumConfig(
     public static final Codec<AnisumConfig> CODEC = AnisumConfig.MAP_CODEC.codec();
 
     public static final StreamCodec<RegistryFriendlyByteBuf, AnisumConfig> STREAM_CODEC = StreamCodec.composite(
-        Identifier.STREAM_CODEC,
+        ResourceLocation.STREAM_CODEC,
         AnisumConfig::location,
         ComponentSerialization.STREAM_CODEC,
         AnisumConfig::name,
@@ -61,11 +61,11 @@ public record AnisumConfig(
         AnisumConfig::new
     );
 
-    public AnisumConfig(Identifier location, Component name, ItemStack icon, List<String> include, List<String> sort) {
+    public AnisumConfig(ResourceLocation location, Component name, ItemStack icon, List<String> include, List<String> sort) {
         this(false, location, name, icon, include, sort);
     }
 
-    private static boolean matches(String pattern, Identifier location) {
+    private static boolean matches(String pattern, ResourceLocation location) {
         String locStr = location.toString();
         if (pattern.equals(locStr)) return true;
         int patternPathCount = pattern.split("/").length - 1;
@@ -84,7 +84,7 @@ public record AnisumConfig(
         }
     }
 
-    public static AnisumConfig createInlineConfig(Identifier location) {
+    public static AnisumConfig createInlineConfig(ResourceLocation location) {
         location = VersionUtil.fromNamespaceAndPath(location.getNamespace(), location.getNamespace());
         return new AnisumConfig(
             true,
@@ -96,7 +96,7 @@ public record AnisumConfig(
         );
     }
 
-    public boolean includeNamespace(Identifier location) {
+    public boolean includeNamespace(ResourceLocation location) {
         for (String s : this.include) {
             String[] split = s.split(":");
             String namespace;
@@ -112,7 +112,7 @@ public record AnisumConfig(
         return false;
     }
 
-    public boolean include(Identifier location) {
+    public boolean include(ResourceLocation location) {
         for (String pattern : this.include) {
             if (matches(pattern, location)) {
                 return true;
@@ -121,7 +121,7 @@ public record AnisumConfig(
         return false;
     }
 
-    public int sort(Identifier location1, Identifier location2) {
+    public int sort(ResourceLocation location1, ResourceLocation location2) {
         if (location1.equals(location2)) return 0;
         int index1 = findMatchIndex(location1);
         int index2 = findMatchIndex(location2);
@@ -131,7 +131,7 @@ public record AnisumConfig(
         return location1.toString().compareTo(location2.toString());
     }
 
-    private int findMatchIndex(Identifier location) {
+    private int findMatchIndex(ResourceLocation location) {
         for (int i = 0; i < this.sort.size(); i++) {
             if (matches(this.sort.get(i), location)) {
                 return i;

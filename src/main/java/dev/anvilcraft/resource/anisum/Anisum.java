@@ -1,7 +1,7 @@
 package dev.anvilcraft.resource.anisum;
 
 import com.mojang.logging.LogUtils;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -17,7 +17,7 @@ public class Anisum {
     public Anisum(IEventBus modEventBus, ModContainer modContainer) {
     }
 
-    public static Identifier of(String path) {
-        return Identifier.fromNamespaceAndPath(MOD_ID, path);
+    public static ResourceLocation of(String path) {
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
     }
 }

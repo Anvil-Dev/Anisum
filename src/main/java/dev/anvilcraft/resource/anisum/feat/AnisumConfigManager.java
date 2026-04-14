@@ -5,7 +5,7 @@ import dev.anvilcraft.resource.anisum.Anisum;
 import dev.anvilcraft.resource.anisum.AnisumConfig;
 import lombok.Getter;
 import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -23,13 +23,13 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 @EventBusSubscriber
-public class AnisumConfigManager extends SimplePreparableReloadListener<Map<Identifier, AnisumConfig>> {
+public class AnisumConfigManager extends SimplePreparableReloadListener<Map<ResourceLocation, AnisumConfig>> {
     private final ReloadableServerResources serverResources;
     private final FileToIdConverter CONFIG_LISTER = FileToIdConverter.json(Anisum.MOD_ID);
     @Getter
     private final AnisumLootTablesLoader lootTablesLoader = new AnisumLootTablesLoader();
     @Getter
-    private Map<Identifier, AnisumConfig> configs = new HashMap<>();
+    private Map<ResourceLocation, AnisumConfig> configs = new HashMap<>();
 
     public AnisumConfigManager(ReloadableServerResources serverResources) {
         this.serverResources = serverResources;
@@ -43,8 +43,8 @@ public class AnisumConfigManager extends SimplePreparableReloadListener<Map<Iden
     }
 
     @Override
-    protected Map<Identifier, AnisumConfig> prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-        SortedMap<Identifier, AnisumConfig> sortedmap = new TreeMap<>();
+    protected Map<ResourceLocation, AnisumConfig> prepare(ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+        SortedMap<ResourceLocation, AnisumConfig> sortedmap = new TreeMap<>();
         SimpleJsonResourceReloadListener.scanDirectory(
             resourceManager,
             CONFIG_LISTER,
@@ -56,7 +56,7 @@ public class AnisumConfigManager extends SimplePreparableReloadListener<Map<Iden
     }
 
     @Override
-    protected void apply(Map<Identifier, AnisumConfig> anisumConfig, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+    protected void apply(Map<ResourceLocation, AnisumConfig> anisumConfig, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
         this.configs = anisumConfig;
         Anisum.LOGGER.info("Loaded {} anisum configs", anisumConfig.size());
     }

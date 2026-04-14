@@ -19,8 +19,8 @@ Anisum is a NeoForge-based Minecraft mod that collects items from loot tables an
 
 ## Compatibility
 
-- Minecraft: `1.21.11`
-- NeoForge: `21.11.38-beta`
+- Minecraft: `1.21.10`
+- NeoForge: `21.10.64`
 - Java: `21`
 - Mod ID: `anisum`
 

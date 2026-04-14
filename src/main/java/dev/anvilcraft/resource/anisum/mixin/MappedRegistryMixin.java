@@ -6,16 +6,16 @@ import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.RegistrationInfo;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.resources.ResourceKey;
 import net.neoforged.neoforge.registries.BaseMappedRegistry;
-import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Map;
 import java.util.Optional;
+import javax.annotation.Nullable;
 
 @Mixin(MappedRegistry.class)
 @SuppressWarnings("UnstableApiUsage")
@@ -26,7 +26,7 @@ abstract class MappedRegistryMixin<T> extends BaseMappedRegistry<T> implements I
 
     @Shadow
     @Final
-    private Map<Identifier, Holder.Reference<T>> byLocation;
+    private Map<ResourceLocation, Holder.Reference<T>> byLocation;
 
     @Shadow
     @Final
