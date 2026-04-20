@@ -1,6 +1,8 @@
 package dev.anvilcraft.resource.anisum.extension;
 
+import dev.anvilcraft.resource.anisum.item.AnisumCreativeModeTab;
 import dev.anvilcraft.resource.anisum.mixin.CreativeModeTabRegistryAccessor;
+import dev.anvilcraft.resource.anisum.network.RegistryItemHolder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -10,28 +12,73 @@ import net.neoforged.neoforgespi.language.IModInfo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Predicate;
 
 public interface ICreativeModeTabRegistryExtension {
     Map<String, IModInfo> MOD_INFO_MAP = new HashMap<>();
 
-    static void sortTabs() {
+    static void sortTabs(List<RegistryItemHolder<CreativeModeTab>> lastedSortedTabs) {
         Registry<CreativeModeTab> tabRegistry = BuiltInRegistries.CREATIVE_MODE_TAB;
-        List<CreativeModeTab> sortedTabs = new ArrayList<>();
-        tabRegistry.forEach(sortedTabs::add);
-        sortedTabs.removeIf(CreativeModeTabRegistryAccessor.getDefaultTabs()::contains);
-        sortedTabs.sort(ICreativeModeTabRegistryExtension::sort);
-        CreativeModeTabRegistryAccessor.setCreativeModeTabOrder(sortedTabs);
+        Set<RegistryItemHolder<CreativeModeTab>> sortedTabs = new LinkedHashSet<>();
+        Set<RegistryItemHolder<CreativeModeTab>> sortedTabs1 = new TreeSet<>(ICreativeModeTabRegistryExtension::sort);
+        Set<RegistryItemHolder<CreativeModeTab>> sortedTabs2 = new TreeSet<>(ICreativeModeTabRegistryExtension::sort);
+        for (RegistryItemHolder<CreativeModeTab> holder : lastedSortedTabs) {
+            ResourceLocation identifier = holder.identifier();
+            if (identifier == null) continue;
+            CreativeModeTab tab = tabRegistry.get(identifier);
+            if (tab == null) continue;
+            if (identifier.getNamespace().equals(ResourceLocation.DEFAULT_NAMESPACE)) {
+                sortedTabs.add(new RegistryItemHolder<>(identifier, tab));
+                continue;
+            }
+            if (tab instanceof AnisumCreativeModeTab) {
+                sortedTabs2.add(new RegistryItemHolder<>(identifier, tab));
+                continue;
+            }
+            sortedTabs1.add(new RegistryItemHolder<>(identifier, tab));
+        }
+        tabRegistry.forEach(tab -> {
+            ResourceLocation identifier = tabRegistry.getKey(tab);
+            RegistryItemHolder<CreativeModeTab> holder = new RegistryItemHolder<>(identifier, tab);
+            if (identifier == null && !sortedTabs1.contains(holder)) {
+                sortedTabs1.add(holder);
+                return;
+            }
+            if (identifier == null) {
+                return;
+            }
+            if (identifier.getNamespace().equals(ResourceLocation.DEFAULT_NAMESPACE) && !sortedTabs.contains(holder)) {
+                sortedTabs.add(holder);
+                return;
+            }
+            if (tab instanceof AnisumCreativeModeTab && !sortedTabs2.contains(holder)) {
+                sortedTabs2.add(holder);
+                return;
+            }
+            sortedTabs1.add(holder);
+        });
+        sortedTabs.removeIf(holder -> CreativeModeTabRegistryAccessor.getDefaultTabs().contains(holder.value()));
+        sortedTabs.addAll(sortedTabs1);
+        sortedTabs.addAll(sortedTabs2);
+        List<CreativeModeTab> resultTabs = new ArrayList<>();
+        for (RegistryItemHolder<CreativeModeTab> holder : sortedTabs) {
+            resultTabs.add(holder.value());
+        }
+        CreativeModeTabRegistryAccessor.setCreativeModeTabOrder(resultTabs);
     }
 
-    static int sort(CreativeModeTab tab1, CreativeModeTab tab2) {
+    static int sort(RegistryItemHolder<CreativeModeTab> tabHolder1, RegistryItemHolder<CreativeModeTab> tabHolder2) {
+        CreativeModeTab tab1 = tabHolder1.value();
+        CreativeModeTab tab2 = tabHolder2.value();
         if (tab1 == tab2) return 0;
-        Registry<CreativeModeTab> tabRegistry = BuiltInRegistries.CREATIVE_MODE_TAB;
-        ResourceLocation key1 = tabRegistry.getKey(tab1);
-        ResourceLocation key2 = tabRegistry.getKey(tab2);
+        ResourceLocation key1 = tabHolder1.identifier();
+        ResourceLocation key2 = tabHolder2.identifier();
         if (key1 == null || key2 == null) {
             return -1;
         }
@@ -40,10 +87,10 @@ public interface ICreativeModeTabRegistryExtension {
         String namespace2 = key2.getNamespace();
 
         // 优先级1：Minecraft官方模组排在最前
-        if (namespace1.equals("minecraft") && !namespace2.equals("minecraft")) {
+        if (namespace1.equals(ResourceLocation.DEFAULT_NAMESPACE) && !namespace2.equals(ResourceLocation.DEFAULT_NAMESPACE)) {
             return -1;
         }
-        if (!namespace1.equals("minecraft") && namespace2.equals("minecraft")) {
+        if (!namespace1.equals(ResourceLocation.DEFAULT_NAMESPACE) && namespace2.equals(ResourceLocation.DEFAULT_NAMESPACE)) {
             return 1;
         }
 

@@ -5,8 +5,8 @@ import dev.anvilcraft.resource.anisum.event.AnisumTabClearEvent;
 import dev.anvilcraft.resource.anisum.event.AnisumTabLoadedEvent;
 import dev.anvilcraft.resource.anisum.extension.ICreativeModeTabRegistryExtension;
 import dev.anvilcraft.resource.anisum.extension.IMappedRegistryExtension;
-import dev.anvilcraft.resource.anisum.network.payload.AnisumTabSyncPayload;
 import dev.anvilcraft.resource.anisum.network.RegistryItemHolder;
+import dev.anvilcraft.resource.anisum.network.payload.AnisumTabSyncPayload;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
@@ -19,6 +19,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
+import net.neoforged.neoforge.common.CreativeModeTabRegistry;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.ArrayList;
@@ -50,6 +51,12 @@ public class CreativeModeTabManager {
         NeoForge.EVENT_BUS.post(new AnisumTabClearEvent(Collections.unmodifiableList(this.creativeModeTabs)));
         this.creativeModeTabs.clear();
         Registry<CreativeModeTab> tabRegistry = BuiltInRegistries.CREATIVE_MODE_TAB;
+        List<RegistryItemHolder<CreativeModeTab>> lastedSortedTabs = new ArrayList<>();
+        for (CreativeModeTab tab : CreativeModeTabRegistry.getSortedCreativeModeTabs()) {
+            ResourceLocation key = tabRegistry.getKey(tab);
+            if (key == null) continue;
+            lastedSortedTabs.add(new RegistryItemHolder<>(key, tab));
+        }
         if (tabRegistry instanceof MappedRegistry<CreativeModeTab> mappedTabRegistry) {
             //noinspection deprecation
             mappedTabRegistry.unfreeze();
@@ -82,7 +89,7 @@ public class CreativeModeTabManager {
                 );
             }
             mappedTabRegistry.freeze();
-            ICreativeModeTabRegistryExtension.sortTabs();
+            ICreativeModeTabRegistryExtension.sortTabs(lastedSortedTabs);
             if (minecraft.screen instanceof CreativeModeInventoryScreen screen) {
                 Window window = minecraft.getWindow();
                 screen.init(minecraft, window.getGuiScaledWidth(), window.getGuiScaledHeight());
