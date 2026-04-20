@@ -36,7 +36,7 @@ abstract class ItemStackMixin implements DataComponentHolder {
         List<Component> components = cir.getReturnValue();
         CustomData customData = this.get(DataComponents.CUSTOM_DATA);
         if (customData != null && customData.contains("id")) {
-            String id = customData.copyTag().getStringOr("id", "");
+            String id = customData.copyTag().getString("id");
             Iterator<Component> iterator = components.iterator();
             while (iterator.hasNext()) {
                 Component component = iterator.next();

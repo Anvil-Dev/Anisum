@@ -1,16 +1,31 @@
 [versions]
-minecraft = "1.21.10"
-neoForge = "21.10.64"
-parchment = "2025.10.12"
+minecraft = "1.21.1"
+neoForge = "21.1.227"
+parchment = "2024.11.17"
 lombok = "8.7.1"
-modDevGradle = "2.0.140"
+modDevGradle = "2.0.141"
 jsr305 = "3.0.2"
-jei = "26.2.0.30"
+jei = "19.27.0.340"
+anvillib = "2.0.0+snapshot.310"
 
 [libraries]
+anvillib-network = { group = "dev.anvilcraft.lib", name = "anvillib-network-neoforge-1.21.1", version.ref = "anvillib" }
 jsr305 = { group = "com.google.code.findbugs", name = "jsr305", version.ref = "jsr305" }
-jeiApi = { group = "mezz.jei", name = "jei-1.21.10-neoforge-api", version.ref = "jei" }
-jei = { group = "mezz.jei", name = "jei-1.21.10-neoforge", version.ref = "jei" }
+jeiApi = { group = "mezz.jei", name = "jei-1.21.1-neoforge-api", version.ref = "jei" }
+jei = { group = "mezz.jei", name = "jei-1.21.1-neoforge", version.ref = "jei" }
+delight = { group = "maven.modrinth", name = "farmers-delight", version = "1.21.1-1.2.11" }
+delight-ends = { group = "maven.modrinth", name = "ends-delight", version = "2.5.1+neoforge.1.21.1" }
+delight-oceans = { group = "maven.modrinth", name = "oceans-delight", version = "1.0.4" }
+delight-crate = { group = "maven.modrinth", name = "crate-delight", version = "25.09.22-1.21-neoforge" }
+create = { group = "maven.modrinth", name = "create", version = "mc1.21.1-6.0.9" }
+create-interiors = { group = "maven.modrinth", name = "interiors", version = "0.6.1" }
+create-bellsandwhistles = { group = "maven.modrinth", name = "bellsandwhistles", version = "v0.4.7-1.21.1" }
+create-addition = { group = "maven.modrinth", name = "createaddition", version = "neoforge-1.21.1-1.5.10" }
+
+[bundles]
+anvillib = ['anvillib-network']
+delight = ['delight', 'delight-ends', 'delight-oceans', 'delight-crate']
+create = ['create', 'create-interiors', 'create-bellsandwhistles', 'create-addition']
 
 [plugins]
 modDevGradle = { id = "net.neoforged.moddev", version.ref = "modDevGradle" }

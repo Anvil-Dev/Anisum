@@ -1,5 +1,6 @@
 repositories {
     mavenLocal()
+    mavenCentral()
     maven {
         // location of the maven that hosts JEI files since January 2023
         name = "Jared's maven"
@@ -9,5 +10,10 @@ repositories {
         // location of a maven mirror for JEI files, as a fallback
         name = "ModMaven"
         url = "https://modmaven.dev"
+    }
+    maven {
+        // location of a maven mirror for JEI files, as a fallback
+        name = "ModrinthMaven"
+        url = "https://api.modrinth.com/maven"
     }
 }

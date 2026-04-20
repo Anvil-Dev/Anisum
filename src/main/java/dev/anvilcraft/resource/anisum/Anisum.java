@@ -9,7 +9,6 @@ import net.neoforged.fml.common.Mod;
 import org.slf4j.Logger;
 
 @Mod(Anisum.MOD_ID)
-@EventBusSubscriber(modid = Anisum.MOD_ID)
 public class Anisum {
     public static final String MOD_ID = "anisum";
     public static final Logger LOGGER = LogUtils.getLogger();

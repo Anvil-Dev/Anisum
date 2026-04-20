@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.Unique;
 @Mixin(ReloadableServerResources.class)
 abstract class ReloadableServerResourcesMixin implements IReloadableServerResourcesExtension {
     @Unique
-    private final AnisumConfigManager anisum$configManager = new AnisumConfigManager((ReloadableServerResources) (Object) this);
+    private final AnisumConfigManager anisum$configManager = new AnisumConfigManager();
 
     @Override
     public AnisumConfigManager anisum$getConfigManager() {

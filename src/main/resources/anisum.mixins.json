@@ -4,6 +4,7 @@
   "package": "dev.anvilcraft.resource.anisum.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "CreativeModeTabRegistryAccessor",
     "CreativeModeTabRegistryMixin",
     "LootPoolMixin",
     "LootTableMixin",

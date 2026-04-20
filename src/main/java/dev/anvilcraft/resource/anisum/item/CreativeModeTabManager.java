@@ -3,7 +3,9 @@ package dev.anvilcraft.resource.anisum.item;
 import com.mojang.blaze3d.platform.Window;
 import dev.anvilcraft.resource.anisum.event.AnisumTabClearEvent;
 import dev.anvilcraft.resource.anisum.event.AnisumTabLoadedEvent;
-import dev.anvilcraft.resource.anisum.network.AnisumTabSyncPayload;
+import dev.anvilcraft.resource.anisum.extension.ICreativeModeTabRegistryExtension;
+import dev.anvilcraft.resource.anisum.extension.IMappedRegistryExtension;
+import dev.anvilcraft.resource.anisum.network.payload.AnisumTabSyncPayload;
 import dev.anvilcraft.resource.anisum.network.RegistryItemHolder;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,7 +19,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
-import net.neoforged.neoforge.common.CreativeModeTabRegistry;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.ArrayList;
@@ -48,16 +49,16 @@ public class CreativeModeTabManager {
         Registry<CreativeModeTab> tabRegistry = BuiltInRegistries.CREATIVE_MODE_TAB;
         if (tabRegistry instanceof MappedRegistry<CreativeModeTab> mappedTabRegistry) {
             //noinspection deprecation
-            mappedTabRegistry.unfreeze(true);
+            mappedTabRegistry.unfreeze();
             List<RegistryItemHolder<CreativeModeTab>> tabs = new ArrayList<>();
             for (ResourceLocation identifier : mappedTabRegistry.keySet()) {
-                CreativeModeTab value = mappedTabRegistry.getValue(identifier);
+                CreativeModeTab value = mappedTabRegistry.get(identifier);
                 if (value == null || value instanceof AnisumCreativeModeTab) {
                     continue;
                 }
                 tabs.add(new RegistryItemHolder<>(identifier, value));
             }
-            mappedTabRegistry.anisum$clear();
+            ((IMappedRegistryExtension) mappedTabRegistry).anisum$clear();
             for (RegistryItemHolder<CreativeModeTab> tab : tabs) {
                 Registry.register(mappedTabRegistry, ResourceKey.create(Registries.CREATIVE_MODE_TAB, tab.identifier()), tab.value());
             }
@@ -78,8 +79,7 @@ public class CreativeModeTabManager {
                 );
             }
             mappedTabRegistry.freeze();
-            //noinspection UnstableApiUsage
-            CreativeModeTabRegistry.sortTabs();
+            ICreativeModeTabRegistryExtension.sortTabs();
             if (minecraft.screen instanceof CreativeModeInventoryScreen screen) {
                 Window window = minecraft.getWindow();
                 screen.init(minecraft, window.getGuiScaledWidth(), window.getGuiScaledHeight());
