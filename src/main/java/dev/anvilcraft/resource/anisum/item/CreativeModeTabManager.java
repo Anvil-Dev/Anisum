@@ -29,6 +29,7 @@ public class CreativeModeTabManager {
     private final List<AnisumTabSyncPayload> payloads = new ArrayList<>();
     private final List<AnisumCreativeModeTab> creativeModeTabs = new ArrayList<>();
     @Getter
+    @Setter
     private boolean loaded = false;
     @Getter
     private boolean loading = false;
