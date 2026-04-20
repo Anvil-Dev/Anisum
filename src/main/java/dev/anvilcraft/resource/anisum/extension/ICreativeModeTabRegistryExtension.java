@@ -49,10 +49,10 @@ public interface ICreativeModeTabRegistryExtension {
 
         // 优先级2：显式的tabsAfter/tabsBefore关系
         if (tab1.tabsAfter.contains(key2) || tab2.tabsBefore.contains(key1)) {
-            return 1;
+            return -1;
         }
         if (tab2.tabsAfter.contains(key1) || tab1.tabsBefore.contains(key2)) {
-            return -1;
+            return 1;
         }
 
         // 优先级3：模组依赖关系 - 附属模组排在父模组后面
