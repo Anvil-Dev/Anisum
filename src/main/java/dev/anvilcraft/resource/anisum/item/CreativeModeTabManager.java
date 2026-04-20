@@ -29,6 +29,8 @@ public class CreativeModeTabManager {
     private final List<AnisumTabSyncPayload> payloads = new ArrayList<>();
     private final List<AnisumCreativeModeTab> creativeModeTabs = new ArrayList<>();
     @Getter
+    private boolean loaded = false;
+    @Getter
     private boolean loading = false;
     @Setter
     private int count = -1;
@@ -89,5 +91,6 @@ public class CreativeModeTabManager {
         this.count = -1;
         this.payloads.clear();
         this.loading = false;
+        this.loaded = true;
     }
 }
