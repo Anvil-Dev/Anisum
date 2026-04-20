@@ -14,6 +14,7 @@ public class AnisumNetworks {
     @SubscribeEvent
     public static void register(RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar(AnisumNetworks.VERSION);
+        registrar.optional();
         NetworkRegistrar.register(registrar, Anisum.MOD_ID);
     }
 }
