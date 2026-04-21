@@ -5,8 +5,8 @@ import dev.anvilcraft.resource.anisum.event.AnisumTabClearEvent;
 import dev.anvilcraft.resource.anisum.event.AnisumTabLoadedEvent;
 import dev.anvilcraft.resource.anisum.extension.ICreativeModeTabRegistryExtension;
 import dev.anvilcraft.resource.anisum.extension.IMappedRegistryExtension;
-import dev.anvilcraft.resource.anisum.network.RegistryItemHolder;
 import dev.anvilcraft.resource.anisum.network.payload.AnisumTabSyncPayload;
+import dev.anvilcraft.resource.anisum.utils.RegistryItemHolder;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.client.Minecraft;
@@ -70,7 +70,8 @@ public class CreativeModeTabManager {
             }
             ((IMappedRegistryExtension) mappedTabRegistry).anisum$clear();
             for (RegistryItemHolder<CreativeModeTab> tab : tabs) {
-                Registry.register(mappedTabRegistry, ResourceKey.create(Registries.CREATIVE_MODE_TAB, tab.identifier()), tab.value());
+                ResourceLocation identifier = tab.identifier();
+                Registry.register(mappedTabRegistry, ResourceKey.create(Registries.CREATIVE_MODE_TAB, identifier), tab.value());
             }
             Minecraft minecraft = Minecraft.getInstance();
             for (AnisumTabSyncPayload payload : this.payloads) {

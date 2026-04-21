@@ -1,11 +1,10 @@
-package dev.anvilcraft.resource.anisum.network;
+package dev.anvilcraft.resource.anisum.utils;
 
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
-import javax.annotation.Nullable;
 
-public record RegistryItemHolder<T>(@Nullable ResourceLocation identifier, T value) {
+public record RegistryItemHolder<T>(ResourceLocation identifier, T value) {
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof RegistryItemHolder<?>(ResourceLocation identifier1, Object value1))) return false;
