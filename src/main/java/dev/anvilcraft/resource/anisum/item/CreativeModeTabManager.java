@@ -3,6 +3,7 @@ package dev.anvilcraft.resource.anisum.item;
 import com.mojang.blaze3d.platform.Window;
 import dev.anvilcraft.resource.anisum.event.AnisumTabClearEvent;
 import dev.anvilcraft.resource.anisum.event.AnisumTabLoadedEvent;
+import dev.anvilcraft.resource.anisum.extension.ICreativeModeTabRegistryExtension;
 import dev.anvilcraft.resource.anisum.network.AnisumTabSyncPayload;
 import dev.anvilcraft.resource.anisum.network.RegistryItemHolder;
 import lombok.Getter;
@@ -46,6 +47,12 @@ public class CreativeModeTabManager {
         NeoForge.EVENT_BUS.post(new AnisumTabClearEvent(Collections.unmodifiableList(this.creativeModeTabs)));
         this.creativeModeTabs.clear();
         Registry<CreativeModeTab> tabRegistry = BuiltInRegistries.CREATIVE_MODE_TAB;
+        List<RegistryItemHolder<CreativeModeTab>> lastedSortedTabs = new ArrayList<>();
+        for (CreativeModeTab tab : CreativeModeTabRegistry.getSortedCreativeModeTabs()) {
+            Identifier key = tabRegistry.getKey(tab);
+            if (key == null) continue;
+            lastedSortedTabs.add(new RegistryItemHolder<>(key, tab));
+        }
         if (tabRegistry instanceof MappedRegistry<CreativeModeTab> mappedTabRegistry) {
             //noinspection deprecation
             mappedTabRegistry.unfreeze(true);
@@ -78,8 +85,7 @@ public class CreativeModeTabManager {
                 );
             }
             mappedTabRegistry.freeze();
-            //noinspection UnstableApiUsage
-            CreativeModeTabRegistry.sortTabs();
+            ICreativeModeTabRegistryExtension.sortTabs(lastedSortedTabs);
             if (minecraft.screen instanceof CreativeModeInventoryScreen screen) {
                 Window window = minecraft.getWindow();
                 screen.init(window.getGuiScaledWidth(), window.getGuiScaledHeight());
