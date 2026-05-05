@@ -1,7 +1,7 @@
 package dev.anvilcraft.resource.anisum.network;
 
+import dev.anvilcraft.lib.v2.network.register.NetworkRegistrar;
 import dev.anvilcraft.resource.anisum.Anisum;
-import dev.anvilcraft.resource.anisum.network.handler.client.AnisumClientPayloadHandler;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
@@ -14,15 +14,6 @@ public class AnisumNetworks {
     @SubscribeEvent
     public static void register(RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar(AnisumNetworks.VERSION);
-        registrar.playToClient(
-            AnisumSyncStartPayload.TYPE,
-            AnisumSyncStartPayload.STREAM_CODEC,
-            AnisumClientPayloadHandler::handleSyncStart
-        );
-        registrar.playToClient(
-            AnisumTabSyncPayload.TYPE,
-            AnisumTabSyncPayload.STREAM_CODEC,
-            AnisumClientPayloadHandler::handleTabSync
-        );
+        NetworkRegistrar.register(registrar.optional(), Anisum.MOD_ID);
     }
 }

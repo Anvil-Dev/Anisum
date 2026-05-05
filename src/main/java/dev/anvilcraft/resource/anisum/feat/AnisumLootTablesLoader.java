@@ -2,8 +2,8 @@ package dev.anvilcraft.resource.anisum.feat;
 
 import dev.anvilcraft.resource.anisum.Anisum;
 import dev.anvilcraft.resource.anisum.AnisumConfig;
-import dev.anvilcraft.resource.anisum.network.AnisumSyncStartPayload;
-import dev.anvilcraft.resource.anisum.network.AnisumTabSyncPayload;
+import dev.anvilcraft.resource.anisum.network.pyload.AnisumSyncStartPayload;
+import dev.anvilcraft.resource.anisum.network.pyload.AnisumTabSyncPayload;
 import dev.anvilcraft.resource.anisum.utils.AnisumItem;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;

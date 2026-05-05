@@ -1,9 +1,11 @@
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 @FieldsAreNonnullByDefault
-package dev.anvilcraft.resource.anisum.network.handler.client;
+@Network
+package dev.anvilcraft.resource.anisum.network.pyload;
 
 import com.mojang.logging.annotations.FieldsAreNonnullByDefault;
 import com.mojang.logging.annotations.MethodsReturnNonnullByDefault;
+import dev.anvilcraft.lib.v2.network.register.Network;
 
 import javax.annotation.ParametersAreNonnullByDefault;

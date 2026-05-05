@@ -1,7 +1,7 @@
 package dev.anvilcraft.resource.anisum.extension;
 
 import dev.anvilcraft.resource.anisum.mixin.CreativeModeTabRegistryAccessor;
-import dev.anvilcraft.resource.anisum.network.RegistryItemHolder;
+import dev.anvilcraft.resource.anisum.utils.RegistryItemHolder;
 import dev.anvilcraft.resource.anisum.utils.SortingTabHolder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;

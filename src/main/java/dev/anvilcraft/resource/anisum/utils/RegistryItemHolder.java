@@ -1,4 +1,4 @@
-package dev.anvilcraft.resource.anisum.network;
+package dev.anvilcraft.resource.anisum.utils;
 
 import net.minecraft.resources.Identifier;
 
