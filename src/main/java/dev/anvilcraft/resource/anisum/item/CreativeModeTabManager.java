@@ -8,6 +8,7 @@ import dev.anvilcraft.resource.anisum.network.pyload.AnisumTabSyncPayload;
 import dev.anvilcraft.resource.anisum.utils.RegistryItemHolder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
 import net.minecraft.core.MappedRegistry;
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+@Slf4j
 public class CreativeModeTabManager {
     private final List<AnisumTabSyncPayload> payloads = new ArrayList<>();
     private final List<AnisumCreativeModeTab> creativeModeTabs = new ArrayList<>();
@@ -78,6 +80,7 @@ public class CreativeModeTabManager {
                     payload.items()
                 );
                 this.creativeModeTabs.add(tab);
+                log.info("Registering anisum creative mode tab: {} with {} items", payload.identifier(), payload.items().size());
                 Registry.register(
                     mappedTabRegistry,
                     ResourceKey.create(Registries.CREATIVE_MODE_TAB, payload.identifier()),
