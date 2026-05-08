@@ -11,6 +11,8 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
+import net.minecraft.world.item.Items;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -33,14 +35,14 @@ public record AnisumConfig(
     boolean inline,
     Identifier location,
     Component name,
-    ItemStack icon,
+    ItemStackTemplate icon,
     List<String> include,
     List<String> sort
 ) implements Comparable<AnisumConfig> {
     public static final MapCodec<AnisumConfig> MAP_CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
         Identifier.CODEC.fieldOf("location").forGetter(AnisumConfig::location),
         ComponentSerialization.CODEC.fieldOf("name").forGetter(AnisumConfig::name),
-        ItemStack.CODEC.optionalFieldOf("icon", ItemStack.EMPTY).forGetter(AnisumConfig::icon),
+        ItemStackTemplate.CODEC.optionalFieldOf("icon", new ItemStackTemplate(Items.BARRIER)).forGetter(AnisumConfig::icon),
         Codec.list(Codec.STRING).optionalFieldOf("include", VersionUtil.listOf()).forGetter(AnisumConfig::include),
         Codec.list(Codec.STRING).optionalFieldOf("sort", VersionUtil.listOf()).forGetter(AnisumConfig::sort)
     ).apply(instance, AnisumConfig::new));
@@ -52,7 +54,7 @@ public record AnisumConfig(
         AnisumConfig::location,
         ComponentSerialization.STREAM_CODEC,
         AnisumConfig::name,
-        ItemStack.STREAM_CODEC,
+        ItemStackTemplate.STREAM_CODEC,
         AnisumConfig::icon,
         ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()),
         AnisumConfig::include,
@@ -61,7 +63,7 @@ public record AnisumConfig(
         AnisumConfig::new
     );
 
-    public AnisumConfig(Identifier location, Component name, ItemStack icon, List<String> include, List<String> sort) {
+    public AnisumConfig(Identifier location, Component name, ItemStackTemplate icon, List<String> include, List<String> sort) {
         this(false, location, name, icon, include, sort);
     }
 
@@ -90,7 +92,7 @@ public record AnisumConfig(
             true,
             location,
             VersionUtil.translatable(String.format("itemGroup.%s.%s", location.getNamespace(), location.getPath())),
-            ItemStack.EMPTY,
+            new ItemStackTemplate(Items.BARRIER),
             VersionUtil.listOf(String.format("%s:*", location.getNamespace())),
             VersionUtil.listOf()
         );

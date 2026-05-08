@@ -75,7 +75,7 @@ public class CreativeModeTabManager {
                 AnisumCreativeModeTab tab = new AnisumCreativeModeTab(
                     CreativeModeTab.builder()
                         .title(payload.name())
-                        .icon(payload::icon)
+                        .icon(payload.icon()::create)
                         .withTabsBefore(CreativeModeTabs.TOOLS_AND_UTILITIES),
                     payload.items()
                 );

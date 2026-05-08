@@ -14,13 +14,14 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 
 import java.util.Set;
 
 public record AnisumTabSyncPayload(
     Identifier identifier,
     Component name,
-    ItemStack icon,
+    ItemStackTemplate icon,
     Set<AnisumItem> items
 ) implements IClientboundPacket {
     public static final Type<AnisumTabSyncPayload> TYPE = new Type<>(Anisum.of("tab_sync"));
@@ -30,7 +31,7 @@ public record AnisumTabSyncPayload(
         AnisumTabSyncPayload::identifier,
         ComponentSerialization.STREAM_CODEC,
         AnisumTabSyncPayload::name,
-        ItemStack.STREAM_CODEC,
+        ItemStackTemplate.STREAM_CODEC,
         AnisumTabSyncPayload::icon,
         AnisumItem.STREAM_CODEC.apply(ByteBufCodecsUtil.set()),
         AnisumTabSyncPayload::items,
