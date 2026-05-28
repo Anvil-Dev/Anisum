@@ -1,8 +1,8 @@
 [versions]
 minecraft = "26.1.2"
-neoForge = "26.1.2.8-beta"
+neoForge = "26.1.2.43-beta"
 lombok = "9.2.0"
-modDevGradle = "2.0.140"
+modDevGradle = "2.0.141"
 jsr305 = "3.0.2"
 jei = "29.5.0.26"
 anvillib = "2.0.0+snapshot.336"

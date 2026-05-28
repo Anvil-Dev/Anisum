@@ -5,6 +5,7 @@ import dev.anvilcraft.resource.anisum.AnisumConfig;
 import dev.anvilcraft.resource.anisum.network.pyload.AnisumSyncStartPayload;
 import dev.anvilcraft.resource.anisum.network.pyload.AnisumTabSyncPayload;
 import dev.anvilcraft.resource.anisum.utils.AnisumItem;
+import lombok.extern.slf4j.Slf4j;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -32,6 +33,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
+@Slf4j
 @EventBusSubscriber(modid = Anisum.MOD_ID)
 public class AnisumLootTablesLoader {
     public final Map<AnisumConfig, Set<AnisumItem>> items = new HashMap<>();
@@ -72,38 +74,45 @@ public class AnisumLootTablesLoader {
             .lookup(Registries.LOOT_TABLE);
         if (lookup.isEmpty()) return;
         var overworld = server.overworld();
+        AnisumConfigManager manager = server.anisum$getConfigManager();
         LootParams params = new LootParams.Builder(overworld).create(ContextKeySet.EMPTY);
         LootContext context = new LootContext.Builder(params).create(Optional.empty());
-        AnisumConfigManager manager = server.anisum$getConfigManager();
         lookup.get().listElements().forEach(reference -> {
-            ResourceKey<LootTable> key = reference.getKey();
-            if (key == null) return;
-            Identifier identifier = key.identifier();
-            if (identifier.getNamespace().equals("minecraft")) return;
-            LootTable lootTable = reference.value();
-            List<LootPool> lootPools = lootTable.anisum$getPools();
-            if (lootPools.size() != 1) return;
-            LootPool lootPool = lootPools.getFirst();
-            List<LootPoolEntryContainer> entries = lootPool.anisum$getEntries();
-            if (entries.size() != 1) return;
-            LootPoolEntryContainer entry = entries.getFirst();
-            if (!(entry instanceof LootItem)) return;
-            lootTable.getRandomItems(
-                context, stack -> {
+            try {
+                ResourceKey<LootTable> key = reference.getKey();
+                if (key == null) return;
+                Identifier identifier = key.identifier();
+                if (identifier.getNamespace().equals(Identifier.DEFAULT_NAMESPACE)) return;
+                LootTable lootTable = reference.value();
+                ContextKeySet lootTableParamSet = lootTable.getParamSet();
+                if (!lootTableParamSet.required().isEmpty() || !lootTableParamSet.allowed().isEmpty()) {
+                    return;
+                }
+                List<LootPool> lootPools = lootTable.anisum$getPools();
+                if (lootPools.size() != 1) return;
+                LootPool lootPool = lootPools.getFirst();
+                List<LootPoolEntryContainer> entries = lootPool.anisum$getEntries();
+                if (entries.size() != 1) return;
+                LootPoolEntryContainer entry = entries.getFirst();
+                if (!(entry instanceof LootItem)) return;
+                //noinspection deprecation
+                lootTable.getRandomItemsRaw(context,stack -> {
                     for (AnisumConfig config : manager.getConfigs().values()) {
                         if (!config.include(identifier)) {
                             continue;
                         }
                         this.items.computeIfAbsent(
-                            config, identifier1 -> new TreeSet<>(
+                            config, _ -> new TreeSet<>(
                                 (i1, i2) -> config.sort(i1.identifier(), i2.identifier())
                             )
                         ).add(
                             new AnisumItem(identifier, stack.copy())
                         );
                     }
-                }
-            );
+                });
+            } catch (Exception e) {
+                log.error(e.getLocalizedMessage(), e);
+            }
         });
         PacketDistributor.sendToAllPlayers(new AnisumSyncStartPayload(this.items.size()));
         for (Map.Entry<AnisumConfig, Set<AnisumItem>> entry : this.items.entrySet()) {
