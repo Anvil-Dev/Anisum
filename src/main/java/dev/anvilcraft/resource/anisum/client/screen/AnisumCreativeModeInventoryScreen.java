@@ -286,7 +286,9 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
                 // Shift-click: clear entire player inventory
                 for (int i = 0; i < this.minecraft.player.inventoryMenu.getItems().size(); i++) {
                     this.minecraft.player.inventoryMenu.getSlot(i).set(ItemStack.EMPTY);
-                    this.minecraft.gameMode.handleCreativeModeItemAdd(ItemStack.EMPTY, i);
+                    if (this.minecraft.gameMode != null) {
+                        this.minecraft.gameMode.handleCreativeModeItemAdd(ItemStack.EMPTY, i);
+                    }
                 }
             } else {
                 // Normal click: clear carried item
@@ -294,6 +296,19 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
             }
             return;
         }
+
+        // Shift-click on hotbar slots: clear the item from the hotbar
+        if (
+            containerInput == ContainerInput.QUICK_MOVE && slot != null
+            && this.minecraft.player != null
+            && slot.container == this.minecraft.player.getInventory()
+            && Inventory.isHotbarSlot(slot.getContainerSlot())
+        ) {
+            slot.set(ItemStack.EMPTY);
+            this.minecraft.player.inventoryMenu.broadcastChanges();
+            return;
+        }
+
         super.slotClicked(slot, slotId, buttonNum, containerInput);
     }
 
