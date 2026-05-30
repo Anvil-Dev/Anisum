@@ -2,12 +2,11 @@ package dev.anvilcraft.resource.anisum.network.pyload;
 
 import dev.anvilcraft.lib.v2.network.packet.IClientboundPacket;
 import dev.anvilcraft.resource.anisum.Anisum;
-import dev.anvilcraft.resource.anisum.item.CreativeModeTabManager;
+import dev.anvilcraft.resource.anisum.client.tab.CreativeModeTabManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.entity.player.Player;
 
 public record AnisumSyncStartPayload(int count) implements IClientboundPacket {

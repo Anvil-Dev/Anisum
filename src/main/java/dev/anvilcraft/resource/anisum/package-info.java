@@ -1,9 +1,4 @@
-@ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
-@FieldsAreNonnullByDefault
+@NullMarked
 package dev.anvilcraft.resource.anisum;
 
-import com.mojang.logging.annotations.FieldsAreNonnullByDefault;
-import com.mojang.logging.annotations.MethodsReturnNonnullByDefault;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

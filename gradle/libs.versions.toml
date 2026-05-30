@@ -3,13 +3,11 @@ minecraft = "26.1.2"
 neoForge = "26.1.2.43-beta"
 lombok = "9.2.0"
 modDevGradle = "2.0.141"
-jsr305 = "3.0.2"
 jei = "29.5.0.26"
 anvillib = "2.0.0+snapshot.336"
 
 [libraries]
 anvillib-network = { group = "dev.anvilcraft.lib", name = "anvillib-network-neoforge-26.1", version.ref = "anvillib" }
-jsr305 = { group = "com.google.code.findbugs", name = "jsr305", version.ref = "jsr305" }
 jeiApi = { group = "mezz.jei", name = "jei-26.1.2-neoforge-api", version.ref = "jei" }
 jei = { group = "mezz.jei", name = "jei-26.1.2-neoforge", version.ref = "jei" }
 

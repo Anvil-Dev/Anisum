@@ -1,4 +1,4 @@
-package dev.anvilcraft.resource.anisum.item;
+package dev.anvilcraft.resource.anisum.client.tab;
 
 import dev.anvilcraft.resource.anisum.utils.AnisumItem;
 import net.minecraft.world.item.CreativeModeTab;

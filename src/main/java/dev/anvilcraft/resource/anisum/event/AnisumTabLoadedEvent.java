@@ -1,6 +1,6 @@
 package dev.anvilcraft.resource.anisum.event;
 
-import dev.anvilcraft.resource.anisum.item.AnisumCreativeModeTab;
+import dev.anvilcraft.resource.anisum.client.tab.AnisumCreativeModeTab;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.neoforged.bus.api.Event;

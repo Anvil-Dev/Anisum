@@ -2,7 +2,7 @@ package dev.anvilcraft.resource.anisum.network.pyload;
 
 import dev.anvilcraft.lib.v2.network.packet.IClientboundPacket;
 import dev.anvilcraft.resource.anisum.Anisum;
-import dev.anvilcraft.resource.anisum.item.CreativeModeTabManager;
+import dev.anvilcraft.resource.anisum.client.tab.CreativeModeTabManager;
 import dev.anvilcraft.resource.anisum.utils.AnisumItem;
 import dev.anvilcraft.resource.anisum.utils.ByteBufCodecsUtil;
 import net.minecraft.client.Minecraft;
@@ -10,10 +10,8 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 
 import java.util.Set;

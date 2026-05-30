@@ -1,6 +1,6 @@
-package dev.anvilcraft.resource.anisum.mixin;
+package dev.anvilcraft.resource.anisum.mixin.client;
 
-import dev.anvilcraft.resource.anisum.extension.IMappedRegistryExtension;
+import dev.anvilcraft.resource.anisum.client.extension.IMappedRegistryExtension;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import net.minecraft.core.Holder;

@@ -1,11 +1,6 @@
-@ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
-@FieldsAreNonnullByDefault
+@NullMarked
 @Network
 package dev.anvilcraft.resource.anisum.network.pyload;
 
-import com.mojang.logging.annotations.FieldsAreNonnullByDefault;
-import com.mojang.logging.annotations.MethodsReturnNonnullByDefault;
 import dev.anvilcraft.lib.v2.network.register.Network;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+import org.jspecify.annotations.NullMarked;

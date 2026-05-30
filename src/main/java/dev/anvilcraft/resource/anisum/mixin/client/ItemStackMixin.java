@@ -1,4 +1,4 @@
-package dev.anvilcraft.resource.anisum.mixin;
+package dev.anvilcraft.resource.anisum.mixin.client;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -28,7 +28,7 @@ abstract class ItemStackMixin implements DataComponentHolder {
         cancellable = true
     )
     private void getTooltipLines(
-        Item.TooltipContext tooltipContext,
+        Item.TooltipContext context,
         @Nullable Player player,
         TooltipFlag tooltipFlag,
         CallbackInfoReturnable<List<Component>> cir

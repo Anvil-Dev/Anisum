@@ -2,7 +2,6 @@ dependencies {
     implementation(libs.bundles.anvillib)
     jarJar(libs.bundles.anvillib)
 
-    compileOnly libs.jsr305
     compileOnly libs.jeiApi
     runtimeOnly libs.jei
 }

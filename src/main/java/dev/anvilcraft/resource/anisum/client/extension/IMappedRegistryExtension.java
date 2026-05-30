@@ -1,4 +1,4 @@
-package dev.anvilcraft.resource.anisum.extension;
+package dev.anvilcraft.resource.anisum.client.extension;
 
 public interface IMappedRegistryExtension<T> {
     default void anisum$clear() {

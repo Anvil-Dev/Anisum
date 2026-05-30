@@ -1,11 +1,11 @@
-package dev.anvilcraft.resource.anisum.item;
+package dev.anvilcraft.resource.anisum.client.tab;
 
 import com.mojang.blaze3d.platform.Window;
 import dev.anvilcraft.resource.anisum.event.AnisumTabClearEvent;
 import dev.anvilcraft.resource.anisum.event.AnisumTabLoadedEvent;
-import dev.anvilcraft.resource.anisum.extension.ICreativeModeTabRegistryExtension;
+import dev.anvilcraft.resource.anisum.client.extension.ICreativeModeTabRegistryExtension;
 import dev.anvilcraft.resource.anisum.network.pyload.AnisumTabSyncPayload;
-import dev.anvilcraft.resource.anisum.utils.RegistryItemHolder;
+import dev.anvilcraft.resource.anisum.client.util.RegistryItemHolder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;

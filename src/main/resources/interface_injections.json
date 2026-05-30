@@ -12,9 +12,9 @@
     "dev/anvilcraft/resource/anisum/extension/IMinecraftServerExtension"
   ],
   "net/minecraft/client/Minecraft": [
-    "dev/anvilcraft/resource/anisum/extension/IMinecraftExtension"
+    "dev/anvilcraft/resource/anisum/client/extension/IMinecraftExtension"
   ],
   "net/minecraft/core/MappedRegistry": [
-    "dev/anvilcraft/resource/anisum/extension/IMappedRegistryExtension<T>"
+    "dev/anvilcraft/resource/anisum/client/extension/IMappedRegistryExtension<T>"
   ]
 }

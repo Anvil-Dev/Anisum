@@ -1,6 +1,6 @@
-package dev.anvilcraft.resource.anisum.utils;
+package dev.anvilcraft.resource.anisum.client.util;
 
-import dev.anvilcraft.resource.anisum.extension.ICreativeModeTabRegistryExtension;
+import dev.anvilcraft.resource.anisum.client.extension.ICreativeModeTabRegistryExtension;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.CreativeModeTab;
 import net.neoforged.neoforge.common.CreativeModeTabRegistry;
