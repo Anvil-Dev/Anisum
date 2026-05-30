@@ -10,6 +10,7 @@
     "ReloadableServerResourcesMixin"
   ],
   "client": [
+    "client.CreativeModeInventoryScreenMixin",
     "client.CreativeModeTabRegistryAccessor",
     "client.InventoryScreenMixin",
     "client.ItemStackMixin",
