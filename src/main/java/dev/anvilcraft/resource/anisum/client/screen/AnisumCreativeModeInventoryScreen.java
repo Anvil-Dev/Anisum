@@ -1,9 +1,12 @@
 package dev.anvilcraft.resource.anisum.client.screen;
 
+import lombok.extern.slf4j.Slf4j;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.client.gui.screens.inventory.EffectsInInventory;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -17,9 +20,11 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScreen {
     public static final Identifier INVENTORY_LOCATION = Identifier.withDefaultNamespace(
-        "textures/gui/container/creative_inventory/tab_inventory.png");
+        "textures/gui/container/creative_inventory/tab_inventory.png"
+    );
     private static final int RIGHT_PANEL_GAP = 8;
     private static final int RIGHT_PANEL_WIDTH = 176;
     private static final int RIGHT_PANEL_HEIGHT = 166;
@@ -52,6 +57,7 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
     // Empty-slot background sprites for armor and offhand
     private static final Field HAS_CLICKED_OUTSIDE_FIELD;
     private static final Field SEARCH_BOX_FIELD;
+    private static final Field EFFECTS;
 
     static {
         try {
@@ -60,6 +66,8 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
 
             SEARCH_BOX_FIELD = CreativeModeInventoryScreen.class.getDeclaredField("searchBox");
             SEARCH_BOX_FIELD.setAccessible(true);
+            EFFECTS = CreativeModeInventoryScreen.class.getDeclaredField("effects");
+            EFFECTS.setAccessible(true);
         } catch (NoSuchFieldException e) {
             throw new RuntimeException("Failed to access CreativeModeInventoryScreen fields", e);
         }
@@ -73,6 +81,11 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
         boolean displayOperatorCreativeTab
     ) {
         super(player, enabledFeatures, displayOperatorCreativeTab);
+        try {
+            EFFECTS.set(this, new AnisumEffectsInInventory(this));
+        } catch (IllegalAccessException e) {
+            log.error(e.getLocalizedMessage(), e);
+        }
     }
 
     @Override
@@ -108,7 +121,7 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
         // Remove previously added right panel slots (handles resize)
         this.menu.slots.removeAll(rightPanelSlots);
         rightPanelSlots.clear();
-
+        if (this.minecraft.player == null) return;
         Inventory playerInv = this.minecraft.player.getInventory();
 
         // Remove vanilla hotbar slots (menu indices 45-53) on first init only.
@@ -217,7 +230,7 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
             256,
             256
         );
-
+        if (this.minecraft.player == null) return;
         InventoryScreen.extractEntityInInventoryFollowsMouse(
             graphics,
             rightX + 73,
@@ -242,6 +255,21 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
         super.containerTick();
         if (this.minecraft.player != null) {
             this.minecraft.player.inventoryMenu.broadcastChanges();
+        }
+    }
+
+    public static class AnisumEffectsInInventory extends EffectsInInventory {
+        public AnisumEffectsInInventory(AbstractContainerScreen<?> screen) {
+            super(screen);
+        }
+
+        @Override
+        public boolean canSeeEffects() {
+            return false;
+        }
+
+        @Override
+        public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
         }
     }
 }
