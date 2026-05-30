@@ -113,9 +113,13 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
 
         Inventory playerInv = this.minecraft.player.getInventory();
 
-        // Remove vanilla hotbar slots (menu indices 45-53) — Slot.x/y are final in 1.21.5
-        for (int i = 0; i < 9; i++) {
-            this.menu.slots.remove(45);
+        // Remove vanilla hotbar slots (menu indices 45-53) on first init only.
+        // Slot.x/y are final in 1.21.5, so we replace them entirely.
+        // On resize, removeAll(rightPanelSlots) above already removed them.
+        if (this.menu.slots.size() > 45) {
+            for (int i = 0; i < 9; i++) {
+                this.menu.slots.remove(45);
+            }
         }
 
         // Hotbar (player inv 0-8) — matches vanilla INVENTORY tab at x=9+col*18, y=112
