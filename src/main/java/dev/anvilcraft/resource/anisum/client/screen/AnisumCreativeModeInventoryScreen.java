@@ -150,6 +150,11 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
             slot.index = this.menu.slots.size();
             this.menu.slots.add(slot);
             rightPanelSlots.add(slot);
+
+            slot = new Slot(playerInv, col, 9 + col * 18, HOTBAR_Y);
+            slot.index = this.menu.slots.size();
+            this.menu.slots.add(slot);
+            rightPanelSlots.add(slot);
         }
 
         // Main inventory (player inv 9-35, 3 rows × 9 cols) — matches vanilla at y=54+row*18
