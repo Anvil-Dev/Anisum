@@ -1,0 +1,7 @@
+{
+  "anisum.configuration.place_side_by_side_inventory_and_creative_tabs": "Place Side By Side Inventory And Creative Tabs",
+  "anisum.configuration.place_side_by_side_inventory_and_creative_tabs.tooltip": "§c[EXPERIMENTAL]§r Place Creative Mode Tabs and Inventory side by side.",
+  "anisum.configuration.section.anisum.client.toml": "Anisum Client Configuration",
+  "anisum.configuration.section.anisum.client.toml.title": "Anisum Client Configuration",
+  "anisum.configuration.title": "Anisum Configuration"
+}

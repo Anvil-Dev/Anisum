@@ -11,6 +11,7 @@
   ],
   "client": [
     "client.CreativeModeTabRegistryAccessor",
+    "client.InventoryScreenMixin",
     "client.ItemStackMixin",
     "client.MappedRegistryMixin",
     "client.MinecraftMixin"

@@ -1,0 +1,7 @@
+{
+  "anisum.configuration.place_side_by_side_inventory_and_creative_tabs": "并排放置创造模式选项卡和物品栏",
+  "anisum.configuration.place_side_by_side_inventory_and_creative_tabs.tooltip": "§c[实验性]§r 将创造模式选项卡和玩家物品栏并排放置。",
+  "anisum.configuration.section.anisum.client.toml": "八角 客户端 配置",
+  "anisum.configuration.section.anisum.client.toml.title": "八角 客户端 配置",
+  "anisum.configuration.title": "八角 配置"
+}
