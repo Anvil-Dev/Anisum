@@ -4,10 +4,13 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 
 import java.lang.reflect.Field;
@@ -15,7 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScreen {
-
+    public static final Identifier INVENTORY_LOCATION = Identifier.withDefaultNamespace(
+        "textures/gui/container/creative_inventory/tab_inventory.png");
     private static final int RIGHT_PANEL_GAP = 8;
     private static final int RIGHT_PANEL_WIDTH = 176;
     private static final int RIGHT_PANEL_HEIGHT = 166;
@@ -46,12 +50,6 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
     private static final int HOTBAR_Y = 112;
 
     // Empty-slot background sprites for armor and offhand
-    private static final Identifier HELMET_SPRITE = Identifier.withDefaultNamespace("container/slot/empty_armor_slot_helmet");
-    private static final Identifier CHESTPLATE_SPRITE = Identifier.withDefaultNamespace("container/slot/empty_armor_slot_chestplate");
-    private static final Identifier LEGGINGS_SPRITE = Identifier.withDefaultNamespace("container/slot/empty_armor_slot_leggings");
-    private static final Identifier BOOTS_SPRITE = Identifier.withDefaultNamespace("container/slot/empty_armor_slot_boots");
-    private static final Identifier SHIELD_SPRITE = Identifier.withDefaultNamespace("container/slot/empty_armor_slot_shield");
-
     private static final Field HAS_CLICKED_OUTSIDE_FIELD;
     private static final Field SEARCH_BOX_FIELD;
 
@@ -146,32 +144,32 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
         //   (54,33) chest  (108,33) boots
 
         Slot helmetSlot = new Slot(playerInv, 39, ARMOR_HELMET_X, ARMOR_HELMET_Y);
-        helmetSlot.setBackground(HELMET_SPRITE);
+        helmetSlot.setBackground(InventoryMenu.EMPTY_ARMOR_SLOT_HELMET);
         helmetSlot.index = this.menu.slots.size();
         this.menu.slots.add(helmetSlot);
         rightPanelSlots.add(helmetSlot);
 
         Slot chestSlot = new Slot(playerInv, 38, ARMOR_CHEST_X, ARMOR_CHEST_Y);
-        chestSlot.setBackground(CHESTPLATE_SPRITE);
+        chestSlot.setBackground(InventoryMenu.EMPTY_ARMOR_SLOT_CHESTPLATE);
         chestSlot.index = this.menu.slots.size();
         this.menu.slots.add(chestSlot);
         rightPanelSlots.add(chestSlot);
 
         Slot legsSlot = new Slot(playerInv, 37, ARMOR_LEGS_X, ARMOR_LEGS_Y);
-        legsSlot.setBackground(LEGGINGS_SPRITE);
+        legsSlot.setBackground(InventoryMenu.EMPTY_ARMOR_SLOT_LEGGINGS);
         legsSlot.index = this.menu.slots.size();
         this.menu.slots.add(legsSlot);
         rightPanelSlots.add(legsSlot);
 
         Slot bootsSlot = new Slot(playerInv, 36, ARMOR_BOOTS_X, ARMOR_BOOTS_Y);
-        bootsSlot.setBackground(BOOTS_SPRITE);
+        bootsSlot.setBackground(InventoryMenu.EMPTY_ARMOR_SLOT_BOOTS);
         bootsSlot.index = this.menu.slots.size();
         this.menu.slots.add(bootsSlot);
         rightPanelSlots.add(bootsSlot);
 
         // Offhand — matches vanilla INVENTORY tab at (35, 20)
         Slot offhandSlot = new Slot(playerInv, 40, OFFHAND_X, OFFHAND_Y);
-        offhandSlot.setBackground(SHIELD_SPRITE);
+        offhandSlot.setBackground(InventoryMenu.EMPTY_ARMOR_SLOT_SHIELD);
         offhandSlot.index = this.menu.slots.size();
         this.menu.slots.add(offhandSlot);
         rightPanelSlots.add(offhandSlot);
@@ -187,7 +185,7 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
         int rightPanelStart = xo + this.imageWidth + RIGHT_PANEL_GAP;
         int rightPanelEnd = rightPanelStart + RIGHT_PANEL_WIDTH;
         boolean inRightPanel = mx >= rightPanelStart && my >= yo
-            && mx < rightPanelEnd && my < yo + RIGHT_PANEL_HEIGHT;
+                               && mx < rightPanelEnd && my < yo + RIGHT_PANEL_HEIGHT;
 
         if (inRightPanel) {
             try {
@@ -207,8 +205,31 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
         int rightX = this.leftPos + this.imageWidth + RIGHT_PANEL_GAP;
         int rightY = this.topPos;
 
-        graphics.fill(rightX, rightY, rightX + RIGHT_PANEL_WIDTH, rightY + RIGHT_PANEL_HEIGHT, 0xFFC6C6C6);
-        graphics.fill(rightX, rightY, rightX + RIGHT_PANEL_WIDTH, rightY + RIGHT_PANEL_HEIGHT, 0x7F000000);
+        graphics.blit(
+            RenderPipelines.GUI_TEXTURED,
+            INVENTORY_LOCATION,
+            rightX,
+            rightY,
+            0.0F,
+            0.0F,
+            this.imageWidth,
+            this.imageHeight,
+            256,
+            256
+        );
+
+        InventoryScreen.extractEntityInInventoryFollowsMouse(
+            graphics,
+            rightX + 73,
+            rightY + 6,
+            rightX + 105,
+            rightY + 49,
+            20,
+            0.0625F,
+            mouseX,
+            mouseY,
+            this.minecraft.player
+        );
     }
 
     @Override
