@@ -15,8 +15,8 @@ import net.minecraft.world.item.Item;
 @JeiPlugin
 public class AnisumJeiPlugin implements IModPlugin {
 
-    /** Total width of the side-by-side layout: creative panel (195) + gap (8) + right panel (176). */
-    private static final int SIDE_BY_SIDE_WIDTH = 195 + 8 + 176;
+    /** Total width of the side-by-side layout: creative panel (195) + gap (8) + right panel (195). */
+    private static final int SIDE_BY_SIDE_WIDTH = 195 + 8 + 195;
 
     @Override
     public Identifier getPluginUid() {

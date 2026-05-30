@@ -11,10 +11,16 @@ import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -23,10 +29,9 @@ import java.util.List;
 @Slf4j
 public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScreen {
     public static final Identifier INVENTORY_LOCATION = Identifier.withDefaultNamespace(
-        "textures/gui/container/creative_inventory/tab_inventory.png"
-    );
+        "textures/gui/container/creative_inventory/tab_inventory.png");
     private static final int RIGHT_PANEL_GAP = 8;
-    private static final int RIGHT_PANEL_WIDTH = 176;
+    private static final int RIGHT_PANEL_WIDTH = 195;
     private static final int RIGHT_PANEL_HEIGHT = 166;
 
     // Right panel origin X relative to leftPos
@@ -54,6 +59,16 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
     private static final int HOTBAR_X = RP_ORIGIN_X + 9; // 212, inv 0-8
     private static final int HOTBAR_Y = 112;
 
+    // Destroy slot — matches vanilla INVENTORY tab at (173, 112)
+    private static final int DESTROY_SLOT_X = RP_ORIGIN_X + 173; // 376
+    private static final int DESTROY_SLOT_Y = HOTBAR_Y; // 112
+
+    /**
+     * Dummy container for the destroy slot (clears carried/player items).
+     */
+    private static final SimpleContainer DUMMY_CONTAINER = new SimpleContainer(1);
+    private final Slot destroySlot = new Slot(DUMMY_CONTAINER, 0, DESTROY_SLOT_X, DESTROY_SLOT_Y);
+
     // Empty-slot background sprites for armor and offhand
     private static final Field HAS_CLICKED_OUTSIDE_FIELD;
     private static final Field SEARCH_BOX_FIELD;
@@ -75,11 +90,7 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
 
     private final List<Slot> rightPanelSlots = new ArrayList<>();
 
-    public AnisumCreativeModeInventoryScreen(
-        LocalPlayer player,
-        FeatureFlagSet enabledFeatures,
-        boolean displayOperatorCreativeTab
-    ) {
+    public AnisumCreativeModeInventoryScreen(LocalPlayer player, FeatureFlagSet enabledFeatures, boolean displayOperatorCreativeTab) {
         super(player, enabledFeatures, displayOperatorCreativeTab);
         try {
             EFFECTS.set(this, new AnisumEffectsInInventory(this));
@@ -155,26 +166,27 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
         // Armor 2×2 grid matching vanilla INVENTORY tab layout:
         //   (54,6) helmet  (108,6) leggings
         //   (54,33) chest  (108,33) boots
+        Player player = this.minecraft.player;
 
-        Slot helmetSlot = new Slot(playerInv, 39, ARMOR_HELMET_X, ARMOR_HELMET_Y);
+        FilteredArmorSlot helmetSlot = new FilteredArmorSlot(playerInv, 39, EquipmentSlot.HEAD, player, ARMOR_HELMET_X, ARMOR_HELMET_Y);
         helmetSlot.setBackground(InventoryMenu.EMPTY_ARMOR_SLOT_HELMET);
         helmetSlot.index = this.menu.slots.size();
         this.menu.slots.add(helmetSlot);
         rightPanelSlots.add(helmetSlot);
 
-        Slot chestSlot = new Slot(playerInv, 38, ARMOR_CHEST_X, ARMOR_CHEST_Y);
+        FilteredArmorSlot chestSlot = new FilteredArmorSlot(playerInv, 38, EquipmentSlot.CHEST, player, ARMOR_CHEST_X, ARMOR_CHEST_Y);
         chestSlot.setBackground(InventoryMenu.EMPTY_ARMOR_SLOT_CHESTPLATE);
         chestSlot.index = this.menu.slots.size();
         this.menu.slots.add(chestSlot);
         rightPanelSlots.add(chestSlot);
 
-        Slot legsSlot = new Slot(playerInv, 37, ARMOR_LEGS_X, ARMOR_LEGS_Y);
+        FilteredArmorSlot legsSlot = new FilteredArmorSlot(playerInv, 37, EquipmentSlot.LEGS, player, ARMOR_LEGS_X, ARMOR_LEGS_Y);
         legsSlot.setBackground(InventoryMenu.EMPTY_ARMOR_SLOT_LEGGINGS);
         legsSlot.index = this.menu.slots.size();
         this.menu.slots.add(legsSlot);
         rightPanelSlots.add(legsSlot);
 
-        Slot bootsSlot = new Slot(playerInv, 36, ARMOR_BOOTS_X, ARMOR_BOOTS_Y);
+        FilteredArmorSlot bootsSlot = new FilteredArmorSlot(playerInv, 36, EquipmentSlot.FEET, player, ARMOR_BOOTS_X, ARMOR_BOOTS_Y);
         bootsSlot.setBackground(InventoryMenu.EMPTY_ARMOR_SLOT_BOOTS);
         bootsSlot.index = this.menu.slots.size();
         this.menu.slots.add(bootsSlot);
@@ -186,6 +198,11 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
         offhandSlot.index = this.menu.slots.size();
         this.menu.slots.add(offhandSlot);
         rightPanelSlots.add(offhandSlot);
+
+        // Destroy slot — clears carried item / entire inventory
+        destroySlot.index = this.menu.slots.size();
+        this.menu.slots.add(destroySlot);
+        rightPanelSlots.add(destroySlot);
     }
 
     @Override
@@ -197,8 +214,7 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
 
         int rightPanelStart = xo + this.imageWidth + RIGHT_PANEL_GAP;
         int rightPanelEnd = rightPanelStart + RIGHT_PANEL_WIDTH;
-        boolean inRightPanel = mx >= rightPanelStart && my >= yo
-                               && mx < rightPanelEnd && my < yo + RIGHT_PANEL_HEIGHT;
+        boolean inRightPanel = mx >= rightPanelStart && my >= yo && mx < rightPanelEnd && my < yo + RIGHT_PANEL_HEIGHT;
 
         if (inRightPanel) {
             try {
@@ -258,6 +274,24 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
         }
     }
 
+    @Override
+    protected void slotClicked(@Nullable Slot slot, int slotId, int buttonNum, ContainerInput containerInput) {
+        if (slot == this.destroySlot && this.minecraft.player != null) {
+            if (containerInput == ContainerInput.QUICK_MOVE) {
+                // Shift-click: clear entire player inventory
+                for (int i = 0; i < this.minecraft.player.inventoryMenu.getItems().size(); i++) {
+                    this.minecraft.player.inventoryMenu.getSlot(i).set(ItemStack.EMPTY);
+                    this.minecraft.gameMode.handleCreativeModeItemAdd(ItemStack.EMPTY, i);
+                }
+            } else {
+                // Normal click: clear carried item
+                this.menu.setCarried(ItemStack.EMPTY);
+            }
+            return;
+        }
+        super.slotClicked(slot, slotId, buttonNum, containerInput);
+    }
+
     public static class AnisumEffectsInInventory extends EffectsInInventory {
         public AnisumEffectsInInventory(AbstractContainerScreen<?> screen) {
             super(screen);
@@ -270,6 +304,31 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
 
         @Override
         public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+        }
+    }
+
+    /**
+     * Armor slot that filters items by equipment type — only helmets in helmet slot, etc.
+     * Matches vanilla {@code InventoryMenu.ArmorSlot} behavior.
+     */
+    private static class FilteredArmorSlot extends Slot {
+        private final Player player;
+        private final EquipmentSlot equipmentSlot;
+
+        FilteredArmorSlot(Inventory inventory, int slotIndex, EquipmentSlot equipmentSlot, Player player, int x, int y) {
+            super(inventory, slotIndex, x, y);
+            this.player = player;
+            this.equipmentSlot = equipmentSlot;
+        }
+
+        @Override
+        public boolean mayPlace(ItemStack stack) {
+            return this.player.getEquipmentSlotForItem(stack) == this.equipmentSlot;
+        }
+
+        @Override
+        public int getMaxStackSize() {
+            return 1;
         }
     }
 }
