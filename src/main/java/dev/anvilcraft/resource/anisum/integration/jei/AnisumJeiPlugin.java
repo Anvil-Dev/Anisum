@@ -70,12 +70,12 @@ public class AnisumJeiPlugin implements IModPlugin {
 
                 @Override
                 public int screenWidth() {
-                    return screen.width;
+                    return Math.max(2, screen.width);
                 }
 
                 @Override
                 public int screenHeight() {
-                    return screen.height;
+                    return Math.max(2, screen.height);
                 }
             }
         );

@@ -1,6 +1,7 @@
 package dev.anvilcraft.resource.anisum.client.tab;
 
 import com.mojang.blaze3d.platform.Window;
+import dev.anvilcraft.resource.anisum.client.compat.BetterCreativeTabsCompat;
 import dev.anvilcraft.resource.anisum.event.AnisumTabClearEvent;
 import dev.anvilcraft.resource.anisum.event.AnisumTabLoadedEvent;
 import dev.anvilcraft.resource.anisum.client.extension.ICreativeModeTabRegistryExtension;
@@ -51,6 +52,7 @@ public class CreativeModeTabManager {
         Registry<CreativeModeTab> tabRegistry = BuiltInRegistries.CREATIVE_MODE_TAB;
         List<RegistryItemHolder<CreativeModeTab>> lastedSortedTabs = new ArrayList<>();
         for (CreativeModeTab tab : CreativeModeTabRegistry.getSortedCreativeModeTabs()) {
+            if (tab instanceof AnisumCreativeModeTab) continue;
             Identifier key = tabRegistry.getKey(tab);
             if (key == null) continue;
             lastedSortedTabs.add(new RegistryItemHolder<>(key, tab));
@@ -89,6 +91,7 @@ public class CreativeModeTabManager {
             }
             mappedTabRegistry.freeze();
             ICreativeModeTabRegistryExtension.sortTabs(lastedSortedTabs);
+            BetterCreativeTabsCompat.invalidateCreativeIndex();
             if (minecraft.screen instanceof CreativeModeInventoryScreen screen) {
                 Window window = minecraft.getWindow();
                 screen.init(window.getGuiScaledWidth(), window.getGuiScaledHeight());

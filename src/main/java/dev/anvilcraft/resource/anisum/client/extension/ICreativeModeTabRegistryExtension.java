@@ -22,13 +22,16 @@ import java.util.TreeMap;
 public interface ICreativeModeTabRegistryExtension {
     static void sortTabs(List<RegistryItemHolder<CreativeModeTab>> lastedSortedTabs) {
         Map<String, SortingTabHolder> sortingMap = new TreeMap<>(ICreativeModeTabRegistryExtension::sortingMapSort);
+        Registry<CreativeModeTab> tabRegistry = BuiltInRegistries.CREATIVE_MODE_TAB;
         for (RegistryItemHolder<CreativeModeTab> lastedSortedTab : lastedSortedTabs) {
+            if (tabRegistry.getValue(lastedSortedTab.identifier()) != lastedSortedTab.value()) {
+                continue;
+            }
             Identifier identifier = lastedSortedTab.identifier();
             String namespace = identifier.getNamespace();
             SortingTabHolder sortingTabHolder = sortingMap.computeIfAbsent(namespace, SortingTabHolder::create);
             sortingTabHolder.addTab(lastedSortedTab);
         }
-        Registry<CreativeModeTab> tabRegistry = BuiltInRegistries.CREATIVE_MODE_TAB;
         for (Map.Entry<ResourceKey<CreativeModeTab>, CreativeModeTab> entry : tabRegistry.entrySet()) {
             Identifier identifier = entry.getKey().identifier();
             RegistryItemHolder<CreativeModeTab> tabHolder = new RegistryItemHolder<>(entry.getKey().identifier(), entry.getValue());
