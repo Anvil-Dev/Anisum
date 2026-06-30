@@ -5,12 +5,14 @@ lombok = "9.2.0"
 modDevGradle = "2.0.141"
 jei = "29.5.0.26"
 anvillib = "2.0.0+snapshot.336"
+bcmt = "8231895"
 
 [libraries]
 anvillib-config = { group = "dev.anvilcraft.lib", name = "anvillib-config-neoforge-26.1", version.ref = "anvillib" }
 anvillib-network = { group = "dev.anvilcraft.lib", name = "anvillib-network-neoforge-26.1", version.ref = "anvillib" }
 jeiApi = { group = "mezz.jei", name = "jei-26.1.2-neoforge-api", version.ref = "jei" }
 jei = { group = "mezz.jei", name = "jei-26.1.2-neoforge", version.ref = "jei" }
+bcmt = { group = "curse.maven", name = "bcmt-1046557", version.ref = "bcmt" }
 
 [bundles]
 anvillib = ["anvillib-config", "anvillib-network"]

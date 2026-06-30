@@ -2,6 +2,9 @@ dependencies {
     implementation(libs.bundles.anvillib)
     jarJar(libs.bundles.anvillib)
 
-    compileOnly libs.jeiApi
-    runtimeOnly libs.jei
+    compileClasspath(libs.bcmt)
+    runtimeClasspath(libs.bcmt)
+
+    compileClasspath(libs.jeiApi)
+    runtimeClasspath(libs.jei)
 }
