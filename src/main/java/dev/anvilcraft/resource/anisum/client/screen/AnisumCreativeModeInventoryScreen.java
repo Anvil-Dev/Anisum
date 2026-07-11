@@ -1,5 +1,6 @@
 package dev.anvilcraft.resource.anisum.client.screen;
 
+import dev.anvilcraft.resource.anisum.mixin.client.AbstractContainerMenuAccessor;
 import lombok.extern.slf4j.Slf4j;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -12,10 +13,10 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
@@ -23,8 +24,6 @@ import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
 
 @Slf4j
 public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScreen {
@@ -88,10 +87,9 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
         }
     }
 
-    private final List<Slot> rightPanelSlots = new ArrayList<>();
-
     public AnisumCreativeModeInventoryScreen(LocalPlayer player, FeatureFlagSet enabledFeatures, boolean displayOperatorCreativeTab) {
         super(player, enabledFeatures, displayOperatorCreativeTab);
+        this.addRightPanelSlots(player);
         try {
             EFFECTS.set(this, new AnisumEffectsInInventory(this));
         } catch (IllegalAccessException e) {
@@ -124,90 +122,50 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
             }
         } catch (IllegalAccessException ignored) {
         }
-
-        addRightPanelSlots();
     }
 
-    private void addRightPanelSlots() {
-        // Remove previously added right panel slots (handles resize)
-        this.menu.slots.removeAll(rightPanelSlots);
-        rightPanelSlots.clear();
-        if (this.minecraft.player == null) return;
-        Inventory playerInv = this.minecraft.player.getInventory();
-
-        // Remove vanilla hotbar slots (menu indices 45-53) on first init only.
-        // Slot.x/y are final in 1.21.5, so we replace them entirely.
-        // On resize, removeAll(rightPanelSlots) above already removed them.
-        if (this.menu.slots.size() > 45) {
-            for (int i = 0; i < 9; i++) {
-                this.menu.slots.remove(45);
-            }
-        }
+    private void addRightPanelSlots(Player player) {
+        InventoryMenu inventoryMenu = player.inventoryMenu;
 
         // Hotbar (player inv 0-8) — matches vanilla INVENTORY tab at x=9+col*18, y=112
         for (int col = 0; col < 9; col++) {
-            Slot slot = new Slot(playerInv, col, HOTBAR_X + col * 18, HOTBAR_Y);
-            slot.index = this.menu.slots.size();
-            this.menu.slots.add(slot);
-            rightPanelSlots.add(slot);
-
-            slot = new Slot(playerInv, col, 9 + col * 18, HOTBAR_Y);
-            slot.index = this.menu.slots.size();
-            this.menu.slots.add(slot);
-            rightPanelSlots.add(slot);
+            this.addRightPanelSlot(
+                inventoryMenu.getSlot(InventoryMenu.USE_ROW_SLOT_START + col),
+                HOTBAR_X + col * 18,
+                HOTBAR_Y
+            );
         }
 
         // Main inventory (player inv 9-35, 3 rows × 9 cols) — matches vanilla at y=54+row*18
         for (int row = 0; row < 3; row++) {
             for (int col = 0; col < 9; col++) {
-                int invIndex = 9 + row * 9 + col;
-                Slot slot = new Slot(playerInv, invIndex, MAIN_INV_X + col * 18, MAIN_INV_Y + row * 18);
-                slot.index = this.menu.slots.size();
-                this.menu.slots.add(slot);
-                rightPanelSlots.add(slot);
+                int menuSlot = InventoryMenu.INV_SLOT_START + row * 9 + col;
+                this.addRightPanelSlot(
+                    inventoryMenu.getSlot(menuSlot),
+                    MAIN_INV_X + col * 18,
+                    MAIN_INV_Y + row * 18
+                );
             }
         }
 
         // Armor 2×2 grid matching vanilla INVENTORY tab layout:
         //   (54,6) helmet  (108,6) leggings
         //   (54,33) chest  (108,33) boots
-        Player player = this.minecraft.player;
-
-        FilteredArmorSlot helmetSlot = new FilteredArmorSlot(playerInv, 39, EquipmentSlot.HEAD, player, ARMOR_HELMET_X, ARMOR_HELMET_Y);
-        helmetSlot.setBackground(InventoryMenu.EMPTY_ARMOR_SLOT_HELMET);
-        helmetSlot.index = this.menu.slots.size();
-        this.menu.slots.add(helmetSlot);
-        rightPanelSlots.add(helmetSlot);
-
-        FilteredArmorSlot chestSlot = new FilteredArmorSlot(playerInv, 38, EquipmentSlot.CHEST, player, ARMOR_CHEST_X, ARMOR_CHEST_Y);
-        chestSlot.setBackground(InventoryMenu.EMPTY_ARMOR_SLOT_CHESTPLATE);
-        chestSlot.index = this.menu.slots.size();
-        this.menu.slots.add(chestSlot);
-        rightPanelSlots.add(chestSlot);
-
-        FilteredArmorSlot legsSlot = new FilteredArmorSlot(playerInv, 37, EquipmentSlot.LEGS, player, ARMOR_LEGS_X, ARMOR_LEGS_Y);
-        legsSlot.setBackground(InventoryMenu.EMPTY_ARMOR_SLOT_LEGGINGS);
-        legsSlot.index = this.menu.slots.size();
-        this.menu.slots.add(legsSlot);
-        rightPanelSlots.add(legsSlot);
-
-        FilteredArmorSlot bootsSlot = new FilteredArmorSlot(playerInv, 36, EquipmentSlot.FEET, player, ARMOR_BOOTS_X, ARMOR_BOOTS_Y);
-        bootsSlot.setBackground(InventoryMenu.EMPTY_ARMOR_SLOT_BOOTS);
-        bootsSlot.index = this.menu.slots.size();
-        this.menu.slots.add(bootsSlot);
-        rightPanelSlots.add(bootsSlot);
+        this.addRightPanelSlot(inventoryMenu.getSlot(InventoryMenu.ARMOR_SLOT_START), ARMOR_HELMET_X, ARMOR_HELMET_Y);
+        this.addRightPanelSlot(inventoryMenu.getSlot(InventoryMenu.ARMOR_SLOT_START + 1), ARMOR_CHEST_X, ARMOR_CHEST_Y);
+        this.addRightPanelSlot(inventoryMenu.getSlot(InventoryMenu.ARMOR_SLOT_START + 2), ARMOR_LEGS_X, ARMOR_LEGS_Y);
+        this.addRightPanelSlot(inventoryMenu.getSlot(InventoryMenu.ARMOR_SLOT_START + 3), ARMOR_BOOTS_X, ARMOR_BOOTS_Y);
 
         // Offhand — matches vanilla INVENTORY tab at (35, 20)
-        Slot offhandSlot = new Slot(playerInv, 40, OFFHAND_X, OFFHAND_Y);
-        offhandSlot.setBackground(InventoryMenu.EMPTY_ARMOR_SLOT_SHIELD);
-        offhandSlot.index = this.menu.slots.size();
-        this.menu.slots.add(offhandSlot);
-        rightPanelSlots.add(offhandSlot);
+        this.addRightPanelSlot(inventoryMenu.getSlot(InventoryMenu.SHIELD_SLOT), OFFHAND_X, OFFHAND_Y);
 
         // Destroy slot — clears carried item / entire inventory
-        destroySlot.index = this.menu.slots.size();
-        this.menu.slots.add(destroySlot);
-        rightPanelSlots.add(destroySlot);
+        ((AbstractContainerMenuAccessor) this.menu).anisum$addSlot(this.destroySlot);
+    }
+
+    private void addRightPanelSlot(Slot target, int x, int y) {
+        InventorySlotWrapper wrapper = new InventorySlotWrapper(target, x, y);
+        ((AbstractContainerMenuAccessor) this.menu).anisum$addSlot(wrapper);
     }
 
     @Override
@@ -272,14 +230,6 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
     }
 
     @Override
-    public void containerTick() {
-        super.containerTick();
-        if (this.minecraft.player != null) {
-            this.minecraft.player.inventoryMenu.broadcastChanges();
-        }
-    }
-
-    @Override
     protected void slotClicked(@Nullable Slot slot, int slotId, int buttonNum, ContainerInput containerInput) {
         if (slot == this.destroySlot && this.minecraft.player != null) {
             if (containerInput == ContainerInput.QUICK_MOVE) {
@@ -297,15 +247,59 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
             return;
         }
 
-        // Shift-click on hotbar slots: clear the item from the hotbar
+        LocalPlayer player = this.minecraft.player;
+
+        if (
+            containerInput == ContainerInput.QUICK_CRAFT && player != null
+            && this.quickCraftSlots.stream().anyMatch(InventorySlotWrapper.class::isInstance)
+        ) {
+            int targetIndex = -999;
+            if (slot instanceof InventorySlotWrapper wrapper) {
+                targetIndex = wrapper.target.index;
+            } else if (
+                slot != null && slot.container == player.getInventory()
+                && Inventory.isHotbarSlot(slot.getContainerSlot())
+            ) {
+                targetIndex = InventoryMenu.USE_ROW_SLOT_START + slot.getContainerSlot();
+            }
+
+            player.inventoryMenu.clicked(targetIndex, buttonNum, containerInput, player);
+            if (AbstractContainerMenu.getQuickcraftHeader(buttonNum) == AbstractContainerMenu.QUICKCRAFT_HEADER_END) {
+                player.inventoryMenu.broadcastChanges();
+            }
+            return;
+        }
+
+        // Preserve the creative screen's shift-click behavior for both hotbar copies.
         if (
             containerInput == ContainerInput.QUICK_MOVE && slot != null
-            && this.minecraft.player != null
-            && slot.container == this.minecraft.player.getInventory()
+            && player != null
+            && slot.container == player.getInventory()
             && Inventory.isHotbarSlot(slot.getContainerSlot())
         ) {
             slot.set(ItemStack.EMPTY);
-            this.minecraft.player.inventoryMenu.broadcastChanges();
+            player.inventoryMenu.broadcastChanges();
+            return;
+        }
+
+        if (slot instanceof InventorySlotWrapper wrapper && player != null) {
+            Slot target = wrapper.target;
+            if (!target.mayPickup(player)) {
+                return;
+            }
+
+            if (containerInput == ContainerInput.THROW && target.hasItem()) {
+                ItemStack toDrop = target.remove(buttonNum == 0 ? 1 : target.getItem().getMaxStackSize());
+                ItemStack remaining = target.getItem();
+                player.drop(toDrop, true);
+                if (this.minecraft.gameMode != null) {
+                    this.minecraft.gameMode.handleCreativeModeItemDrop(toDrop);
+                    this.minecraft.gameMode.handleCreativeModeItemAdd(remaining, target.index);
+                }
+            } else {
+                player.inventoryMenu.clicked(target.index, buttonNum, containerInput, player);
+                player.inventoryMenu.broadcastChanges();
+            }
             return;
         }
 
@@ -328,27 +322,94 @@ public class AnisumCreativeModeInventoryScreen extends CreativeModeInventoryScre
     }
 
     /**
-     * Armor slot that filters items by equipment type — only helmets in helmet slot, etc.
-     * Matches vanilla {@code InventoryMenu.ArmorSlot} behavior.
+     * Presents an InventoryMenu slot at another position without changing its server slot index or behavior.
      */
-    private static class FilteredArmorSlot extends Slot {
-        private final Player player;
-        private final EquipmentSlot equipmentSlot;
+    private static class InventorySlotWrapper extends Slot {
+        private final Slot target;
 
-        FilteredArmorSlot(Inventory inventory, int slotIndex, EquipmentSlot equipmentSlot, Player player, int x, int y) {
-            super(inventory, slotIndex, x, y);
-            this.player = player;
-            this.equipmentSlot = equipmentSlot;
+        InventorySlotWrapper(Slot target, int x, int y) {
+            super(target.container, target.getContainerSlot(), x, y);
+            this.target = target;
         }
 
         @Override
         public boolean mayPlace(ItemStack stack) {
-            return this.player.getEquipmentSlotForItem(stack) == this.equipmentSlot;
+            return this.target.mayPlace(stack);
+        }
+
+        @Override
+        public void onTake(Player player, ItemStack stack) {
+            this.target.onTake(player, stack);
+        }
+
+        @Override
+        public ItemStack getItem() {
+            return this.target.getItem();
+        }
+
+        @Override
+        public boolean hasItem() {
+            return this.target.hasItem();
+        }
+
+        @Override
+        public void setByPlayer(ItemStack stack, ItemStack previous) {
+            this.target.setByPlayer(stack, previous);
+        }
+
+        @Override
+        public void set(ItemStack stack) {
+            this.target.set(stack);
+        }
+
+        @Override
+        public void setChanged() {
+            this.target.setChanged();
         }
 
         @Override
         public int getMaxStackSize() {
-            return 1;
+            return this.target.getMaxStackSize();
+        }
+
+        @Override
+        public int getMaxStackSize(ItemStack stack) {
+            return this.target.getMaxStackSize(stack);
+        }
+
+        @Override
+        public @Nullable Identifier getNoItemIcon() {
+            return this.target.getNoItemIcon();
+        }
+
+        @Override
+        public ItemStack remove(int amount) {
+            return this.target.remove(amount);
+        }
+
+        @Override
+        public boolean mayPickup(Player player) {
+            return this.target.mayPickup(player);
+        }
+
+        @Override
+        public boolean isActive() {
+            return this.target.isActive();
+        }
+
+        @Override
+        public boolean allowModification(Player player) {
+            return this.target.allowModification(player);
+        }
+
+        @Override
+        public boolean isHighlightable() {
+            return this.target.isHighlightable();
+        }
+
+        @Override
+        public boolean isFake() {
+            return this.target.isFake();
         }
     }
 }
