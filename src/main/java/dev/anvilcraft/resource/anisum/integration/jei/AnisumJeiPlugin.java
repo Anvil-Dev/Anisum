@@ -60,6 +60,9 @@ public class AnisumJeiPlugin implements IModPlugin {
     @Override
     public void registerItemSubtypes(ISubtypeRegistration registration) {
         for (Item item : BuiltInRegistries.ITEM) {
+            if (!item.builtInRegistryHolder().unwrapKey().map(e->
+                    e.identifier().getNamespace().equals("minecraft")).orElse(false))
+                return;
             if (JEI_VANILLA_SUBTYPE_ITEMS.contains(item)) {
                 continue;
             }
