@@ -84,6 +84,7 @@ public class AnisumLootTablesLoader {
                 Identifier identifier = key.identifier();
                 if (identifier.getNamespace().equals(Identifier.DEFAULT_NAMESPACE)) return;
                 LootTable lootTable = reference.value();
+                if (!lootTable.getParamSet().required().isEmpty()) return;
                 List<LootPool> lootPools = lootTable.anisum$getPools();
                 if (lootPools.size() != 1) return;
                 LootPool lootPool = lootPools.getFirst();
